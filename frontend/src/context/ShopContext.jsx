@@ -16,6 +16,9 @@ const ShopContextProvider = (props)=>{
 
     const [sortBy, setSortBy] = useState('default');
 
+    const [mobileFilterVisible, setMobileFilterVisible] = useState(false);
+    const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+
     const filterProducts = () => {
         let filtered = products;
 
@@ -41,6 +44,10 @@ const ShopContextProvider = (props)=>{
 
     const filteredAndSortedProducts = sortProducts(filterProducts());
 
+    const getProductById = (id) => {
+        return products.find(product => product._id === id);
+    };
+
     const value ={
         products: filteredAndSortedProducts,
         currency,
@@ -48,7 +55,12 @@ const ShopContextProvider = (props)=>{
         filters,
         setFilters,
         sortBy,
-        setSortBy
+        setSortBy,
+        mobileFilterVisible,
+        setMobileFilterVisible,
+        mobileMenuVisible,
+        setMobileMenuVisible,
+        getProductById
     }
     return (
         <ShopContext.Provider value ={value}>
