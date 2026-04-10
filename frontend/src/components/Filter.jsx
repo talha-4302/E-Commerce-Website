@@ -34,10 +34,10 @@ const Filter = () => {
   
     return (
      
-      <div className={`${visible?'block absolute transition-all right-0 top-0   w-full h-full  overflow-y-auto':'hidden'}  sm:block sm:mt-25 w-1/5 bg-gray-50 p-6 h-1/2`}>
+      <div className={`${visible?'block absolute transition-all right-0 top-0   w-full h-full  overflow-y-auto':'hidden'}  lg:block lg:mt-37 w-1/5 bg-gray-50 p-6 h-1/2`}>
         <div className='flex justify-between items-center mb-6'>
           <h2 className='text-lg font-semibold'>Filters</h2>
-          <button onClick={() => setMobileFilterVisible(false)} className='text-xl sm:hidden font-bold'>×</button>
+          <button onClick={() => setMobileFilterVisible(false)} className='text-xl lg:hidden font-bold'>×</button>
         </div>
 
         {/* Category */}
