@@ -12,6 +12,7 @@ const Product = () => {
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
 
+
   const product = getProductById(productid)
 
   // Dummy reviews data
@@ -56,12 +57,12 @@ const Product = () => {
   ).slice(0, 4)
 
   return (
-    <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
+    <div className='  transition-opacity ease-in duration-500 opacity-100'>
       {/* Gray separator line */}
       <div className='h-[1px] bg-gray-300 mb-8'></div>
 
       {/* Product Display Section */}
-      <div className='flex flex-col md:flex-row gap-8 mb-16'>
+      <div className='pt-10 flex flex-col md:flex-row gap-8 mb-16'>
         {/* Left Side - Product Images */}
         <div className='flex-1 flex gap-4'>
           {/* Thumbnails */}
@@ -81,10 +82,11 @@ const Product = () => {
 
           {/* Main Image */}
           <div className='flex-1'>
+            {product.image[selectedImage]? null : setSelectedImage(0)}
             <img
-              src={product.image[selectedImage]}
+              src={  product.image[selectedImage] }
               alt={product.name}
-              className='w-full h-full object-cover rounded'
+              className='w-full h-[80%] object-contain rounded'
             />
           </div>
         </div>
@@ -192,7 +194,7 @@ const Product = () => {
               _id={relatedProduct._id}
               name={relatedProduct.name}
               price={relatedProduct.price}
-              image={relatedProduct.image}
+              image={relatedProduct.image[0]}
               bestseller={relatedProduct.bestseller}
             />
           ))}
