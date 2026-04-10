@@ -1,19 +1,27 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { ShopContext } from '../context/ShopContext'
+import { ShopContext } from '../context/ShopContext.js'
 import { assets } from '../assets/assets'
 import ProductCard from '../components/ProductCard'
 import { products } from '../assets/assets'
 
 const Product = () => {
   const { productid } = useParams()
-  const { currency, getProductById } = useContext(ShopContext)
+  const { currency, getProductById, addToCart } = useContext(ShopContext)
 
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
 
+  useEffect(()=>{window.scrollTo(0,0)}, [productid]);
+
 
   const product = getProductById(productid)
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    const sizeToAdd = selectedSize || product.sizes?.[0] || null;
+    addToCart(product, sizeToAdd, 1);
+  }
 
   // Dummy reviews data
   const reviews = [
@@ -62,7 +70,7 @@ const Product = () => {
       <div className='h-[1px] bg-gray-300 mb-8'></div>
 
       {/* Product Display Section */}
-      <div className='pt-10 flex flex-col md:flex-row gap-8 mb-16'>
+      <div className='pt-10 flex flex-col md:flex-row gap-8 mb-8'>
         {/* Left Side - Product Images */}
         <div className='flex-1 flex gap-4'>
           {/* Thumbnails */}
@@ -86,7 +94,7 @@ const Product = () => {
             <img
               src={  product.image[selectedImage] }
               alt={product.name}
-              className='w-full h-[80%] object-contain rounded'
+              className='w-full h-[80%] object-cover rounded'
             />
           </div>
         </div>
@@ -112,7 +120,7 @@ const Product = () => {
           </div>
 
           {/* Price */}
-          <p className='text-3xl font-semibold text-gray-900 mb-4'>
+          <p className='text-2xl font-semibold text-gray-900 mb-4'>
             {currency}{product.price}
           </p>
 
@@ -142,7 +150,7 @@ const Product = () => {
           </div>
 
           {/* Add to Cart Button */}
-          <button className='w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors mb-6'>
+          <button onClick={handleAddToCart} className='w-full md:w-1/2 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors mb-6'>
             ADD TO CART
           </button>
 

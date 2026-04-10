@@ -42,14 +42,14 @@ const Collection = () => {
               <img src={assets.filter_icon} alt='Filter' className='w-5 h-5 cursor-pointer' onClick={handleDropFilters} />
             </div>
 
-            <p className='text-gray-500 text-lg sm:text-2xl'>ALL <span className ='text-gray-700 text-lg sm:text-2xl font-medium'>Collections</span></p>
-            <p className = 'w-8 sm:w-12 h-[1px] sm:h-[2px] bg-gray-700'></p>
+            <p className='text-gray-500 text-md sm:text-2xl'>ALL <span className ='text-gray-700 text-md sm:text-2xl font-medium'>Collections</span></p>
+            <p className = 'w-8 mr-2 sm:w-12 h-[1px] sm:h-[2px] bg-gray-700'></p>
           </div>
 
           <select
             value={sortBy}
             onChange={handleSortChange}
-            className='border border-gray-300 px-4 py-2 rounded'
+            className='w-30 sm:w-fit border border-gray-300 px-4 py-2 rounded'
           >
             <option value=''>Sort By</option>
             <option value='date'>Newest Arrivals</option>
@@ -57,7 +57,7 @@ const Collection = () => {
         </div>
 
         {/* Products Grid */}
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6'>
+        <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
           {products.map(product => (
             <ProductCard
               key={product._id}

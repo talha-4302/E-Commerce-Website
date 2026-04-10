@@ -1,12 +1,12 @@
 import React, {  useContext } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import {assets} from '../assets/assets.js'
-import { ShopContext } from '../context/ShopContext'
+import { ShopContext } from '../context/ShopContext.js'
 
 
 const Navbar = () => {
 
-    const {mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible } = useContext(ShopContext);
+    const {mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible, cartItemCount } = useContext(ShopContext);
 
 
   return (
@@ -54,7 +54,11 @@ const Navbar = () => {
 
              <Link to='/cart' className='relative'>
              <img src ={assets.cart_icon} className='w-5 min-w-5' />
-             <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center text-white leading-4 bg-black aspect-square rounded-full text-[8px]'>10</p>
+             {cartItemCount > 0 && (
+               <p className='absolute right-[-5px] bottom-[-5px] min-w-[16px] px-[2px] text-center text-white leading-4 bg-black rounded-full text-[8px]'>
+                 {cartItemCount}
+               </p>
+             )}
              </Link>
              <img onClick={()=>{ {mobileFilterVisible?setMobileFilterVisible(false):null} setMobileMenuVisible(true); }} className ='w-5 cursor-pointer sm:hidden' src ={assets.menu_icon}  alt=""/>
 
