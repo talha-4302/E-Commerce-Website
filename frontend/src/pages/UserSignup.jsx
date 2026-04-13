@@ -12,11 +12,11 @@ const UserSignup = () => {
     };
 
     return (
-        <div className="flex justify-center items-center h-[80vh]">
-            <form onSubmit={onSubmitHandler} className="w-full max-w-md bg-white p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]">
+        <div className="flex justify-center items-center min-h-[80vh] px-4 sm:px-6 py-10 sm:py-0">
+            <form onSubmit={onSubmitHandler} className="w-full max-w-md bg-white p-5 sm:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]">
                 <div className="text-center mb-8">
                     <div className='inline-flex gap-2 items-center mb-5 '>
-                        <p className='text-3xl text-gray-600'>Create <span className='text-gray-900 font-medium'>Account</span></p>
+                        <p className='text-2xl sm:text-3xl text-gray-600'>Create <span className='text-gray-900 font-medium'>Account</span></p>
                     </div>
                     <p className="text-gray-400 text-sm">Join us today. Please enter your details.</p>
                 </div>

@@ -48,7 +48,7 @@ const Collection = () => {
         <div className='flex flex-col lg:flex-row gap-4 mb-6'>
           <div className='flex flex-wrap items-center justify-between gap-4 w-full'>
             <div className='inline-flex pt-2 gap-2 items-center flex-wrap'>
-              <p className='text-gray-500 text-lg sm:text-2xl whitespace-nowrap'>ALL <span className='text-gray-700 font-medium'>Collections</span></p>
+              <p className='text-gray-500 text-xl sm:text-2xl whitespace-nowrap'>ALL <span className='text-gray-700 font-medium'>Collections</span></p>
               <p className='w-8 sm:w-12 h-[1px] sm:h-[2px] bg-gray-700'></p>
             </div>
 

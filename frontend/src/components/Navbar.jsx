@@ -39,7 +39,7 @@ const Navbar = () => {
             </ul>
 
             <div className='flex items-center gap-6'>
-                <img src={assets.search_icon} className=' hidden w-5'></img>
+                <img src={assets.search_icon} className=' w-5'></img>
 
                 <div className="group relative">
                     <img src={assets.profile_icon} className="w-5 cursor-pointer" alt="" />
@@ -48,6 +48,9 @@ const Navbar = () => {
                             <p className='cursor-pointer hover:text-black '>My Profile</p>
                             <p className='cursor-pointer hover:text-black '>Orders</p>
                             <p className='cursor-pointer hover:text-black '>Logout</p>
+                            <Link to='/userlogin' className='cursor-pointer hover:text-black '>Login</Link>
+                            <Link to='/usersignup' className='cursor-pointer hover:text-black '>Sign Up</Link>
+
                         </div>
                     </div>
                 </div>
