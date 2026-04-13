@@ -1,16 +1,24 @@
 
+/* ========== Google Fonts Import ========== */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Prata&display=swap');
 
+/* ========== Tailwind CSS Import ========== */
 @import "tailwindcss";
+
+/* ========== Active Navigation Link ========== */
+/* Shows the underline indicator on the currently active NavLink */
 a.active hr{
     display: block;
 }
 
+/* ========== Global Font Settings ========== */
+/* Applies Outfit font to all elements as default */
 *{
     font-family: Outfit;
 }
 
-
+/* ========== Prata Font Utility ========== */
+/* Used for special headings or decorative text */
 .prata-regular {
   font-family: "Prata", serif;
   font-weight: 400;

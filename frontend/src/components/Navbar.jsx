@@ -1,12 +1,21 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { assets } from '../assets/assets.js'
 import { ShopContext } from '../context/ShopContext.js'
 
 
-const Navbar = () => {
+const Navbar = ({ onSearchToggle }) => {
 
     const { mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible, cartItemCount } = useContext(ShopContext);
+    const [searchOpen, setSearchOpen] = useState(false)
+
+    const handleSearchToggle = () => {
+        const newState = !searchOpen
+        setSearchOpen(newState)
+        if (onSearchToggle) {
+            onSearchToggle(newState)
+        }
+    }
 
 
     return (
@@ -39,7 +48,7 @@ const Navbar = () => {
             </ul>
 
             <div className='flex items-center gap-6'>
-                <img src={assets.search_icon} className=' w-5'></img>
+                <img src={assets.search_icon} className='w-5 cursor-pointer' onClick={handleSearchToggle} alt='Search' />
 
                 <div className="group relative">
                     <img src={assets.profile_icon} className="w-5 cursor-pointer" alt="" />

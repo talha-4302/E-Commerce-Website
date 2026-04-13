@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Collection from './pages/Collection';
@@ -10,13 +10,17 @@ import Product from './pages/Product';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
 import Navbar from './components/Navbar';
+import SearchBar from './components/SearchBar';
 import Footer from './components/Footer';
 import UserLogin from './pages/UserLogin';
 import UserSignup from './pages/UserSignup';
 const App = () => {
+  const [searchOpen, setSearchOpen] = useState(false)
+
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
-      <Navbar />
+      <Navbar onSearchToggle={setSearchOpen} />
+      <SearchBar searchOpen={searchOpen} setSearchOpen={setSearchOpen} />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/collection' element={<Collection />} />

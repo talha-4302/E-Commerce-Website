@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import ProductCard from '../components/ProductCard'
 import { assets } from '../assets/assets.js'
@@ -6,28 +7,25 @@ import Filter from '../components/Filter.jsx'
 
 const Collection = () => {
   const { products, sortBy, setSortBy, mobileFilterVisible, setMobileFilterVisible } = useContext(ShopContext)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchInput, setSearchInput] = useState('')
+  const [searchParams] = useSearchParams()
+  const searchQuery = searchParams.get('q') || ''
 
-  const handleSearchToggle = () => {
-    setSearchOpen(prev => !prev)
-  }
-
-  const handleSearchChange = (e) => {
-    setSearchInput(e.target.value)
-  }
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault()
-    console.log('Search submitted:', searchInput)
-  }
+  // Filter products based on search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return products
+    
+    const query = searchQuery.toLowerCase()
+    return products.filter(product => 
+      product.name.toLowerCase().includes(query) ||
+      product.description?.toLowerCase().includes(query) ||
+      product.category?.toLowerCase().includes(query) ||
+      product.subcategory?.toLowerCase().includes(query)
+    )
+  }, [products, searchQuery])
 
   const handleDropFilters = () => {
     setMobileFilterVisible(prev => !prev);
   }
-
-
-
 
   const handleSortChange = (e) => {
     const value = e.target.value
@@ -70,39 +68,21 @@ const Collection = () => {
               <option value=''>Sort By</option>
               <option value='date'>Newest Arrivals</option>
             </select>
-            <button
-              type='button'
-              onClick={handleSearchToggle}
-              className='inline-flex items-center justify-center rounded border border-gray-300 bg-white p-2 hover:bg-gray-100'
-            >
-              <img src={assets.search_icon} alt='Search' className='w-5 h-5' />
-            </button>
           </div>
         </div>
 
-        {searchOpen && (
-          <div className='mb-6'>
-            <form onSubmit={handleSearchSubmit} className='mx-auto flex w-full max-w-3xl flex-col gap-3 sm:flex-row'>
-              <input
-                type='text'
-                value={searchInput}
-                onChange={handleSearchChange}
-                placeholder='Search products...'
-                className='flex-1 w-full rounded border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/10'
-              />
-              <button
-                type='submit'
-                className='w-full sm:w-auto rounded bg-black px-5 py-3 text-sm font-medium text-white hover:bg-gray-800'
-              >
-                Search
-              </button>
-            </form>
+        {searchQuery && (
+          <div className='mb-4'>
+            <p className='text-sm text-gray-600'>
+              Showing results for "<span className='font-medium text-gray-800'>{searchQuery}</span>"
+              <span className='ml-2 text-gray-400'>({filteredProducts.length} {filteredProducts.length === 1 ? 'result' : 'results'})</span>
+            </p>
           </div>
         )}
 
         {/* Products Grid */}
         <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
-          {products.map(product => (
+          {filteredProducts.map(product => (
             <ProductCard
               key={product._id}
               _id={product._id}
