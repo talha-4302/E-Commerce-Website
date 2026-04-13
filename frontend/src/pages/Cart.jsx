@@ -22,41 +22,44 @@ const Cart = () => {
         <div className='space-y-8'>
           <div className='space-y-4'>
             {cartItems.map((item) => (
-              <div key={`${item._id}-${item.size}`} className='flex flex-col gap-4 p-4 border border-gray-200 rounded md:flex-row md:items-center md:justify-between'>
-                <div className='flex items-center gap-4 flex-1 min-w-0'>
-                  <img src={item.image?.[0]} alt={item.name} className='w-20 h-20 object-cover rounded' />
+              <div key={`${item._id}-${item.size}`} className='flex items-start sm:items-center gap-4 p-4 border border-gray-200 rounded'>
+                <img src={item.image?.[0]} alt={item.name} className='w-16 h-16 sm:w-20 sm:h-20 object-cover rounded' />
+                
+                <div className='flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
                   <div className='min-w-0'>
-                    <p className='font-medium text-gray-900 truncate'>{item.name}</p>
-                    <div className='flex flex-wrap items-center gap-3 text-sm text-gray-600 mt-2'>
+                    <p className='font-medium text-gray-900 truncate text-sm sm:text-base'>{item.name}</p>
+                    <div className='flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2'>
                       <span>{currency}{item.price}</span>
                       <span className='text-gray-300'>|</span>
                       <span>Size: {item.size || '-'}</span>
                     </div>
                   </div>
-                </div>
 
-                <div className='flex items-center gap-3'>
-                  <button
-                    onClick={() => updateCartItemQuantity(item._id, item.size, item.quantity - 1)}
-                    className='px-3 py-1 border border-gray-300 rounded hover:bg-gray-100'
-                  >
-                    -
-                  </button>
-                  <span className='w-8 text-center text-gray-800'>{item.quantity}</span>
-                  <button
-                    onClick={() => updateCartItemQuantity(item._id, item.size, item.quantity + 1)}
-                    className='px-3 py-1 border border-gray-300 rounded hover:bg-gray-100'
-                  >
-                    +
-                  </button>
-                </div>
+                  <div className='flex items-center gap-4 sm:gap-6 pt-2 sm:pt-0'>
+                    <div className='flex items-center gap-2 sm:gap-3 bg-gray-50 rounded-lg p-1'>
+                      <button
+                        onClick={() => updateCartItemQuantity(item._id, item.size, item.quantity - 1)}
+                        className='w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-200 bg-white shadow-sm rounded hover:bg-gray-100'
+                      >
+                        -
+                      </button>
+                      <span className='w-6 text-center text-gray-800 text-sm sm:text-base font-medium'>{item.quantity}</span>
+                      <button
+                        onClick={() => updateCartItemQuantity(item._id, item.size, item.quantity + 1)}
+                        className='w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-200 bg-white shadow-sm rounded hover:bg-gray-100'
+                      >
+                        +
+                      </button>
+                    </div>
 
-                <button
-                  onClick={() => removeFromCart(item._id, item.size)}
-                  className='p-2 bg-gray-100 rounded hover:bg-gray-200'
-                >
-                  <img src={assets.bin_icon} alt='Remove' className='w-4 h-4' />
-                </button>
+                    <button
+                      onClick={() => removeFromCart(item._id, item.size)}
+                      className='p-2 bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors'
+                    >
+                      <img src={assets.bin_icon} alt='Remove' className='w-4 h-4 sm:w-5 sm:h-5 opacity-70' />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

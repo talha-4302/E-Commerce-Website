@@ -70,17 +70,17 @@ const Product = () => {
       <div className='h-[1px] bg-gray-300 mb-8'></div>
 
       {/* Product Display Section */}
-      <div className='pt-10 flex flex-col md:flex-row gap-8 mb-8'>
+      <div className='pt-10 flex flex-col sm:flex-row gap-8 mb-8'>
         {/* Left Side - Product Images */}
-        <div className='flex-1 flex gap-4'>
+        <div className='flex-1 flex flex-col-reverse sm:flex-row gap-4'>
           {/* Thumbnails */}
-          <div className='flex flex-col gap-2'>
+          <div className='flex sm:flex-col overflow-x-auto sm:overflow-visible w-full sm:w-auto gap-2 thumbnail-scrollbar'>
             {product.image.map((img, index) => (
               <img
                 key={index}
                 src={img}
                 alt={`Product ${index + 1}`}
-                className={`w-16 h-16 md:w-20 md:h-20 object-cover rounded cursor-pointer border-2 ${
+                className={`w-[20%] sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0 object-cover rounded cursor-pointer border-2 ${
                   selectedImage === index ? 'border-black' : 'border-gray-200'
                 }`}
                 onClick={() => setSelectedImage(index)}
