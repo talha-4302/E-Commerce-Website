@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShopContext } from "./ShopContext.js";
 import { products } from "../assets/assets";
+import { toast } from "react-toastify";
 
 const ShopContextProvider = (props)=>{
 
@@ -18,6 +19,18 @@ const ShopContextProvider = (props)=>{
     const [mobileFilterVisible, setMobileFilterVisible] = useState(false);
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
     const [cartItems, setCartItems] = useState([]);
+    const [wishlistItems, setWishlistItems] = useState(() => {
+        try {
+            const saved = localStorage.getItem('wishlist');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
+    }, [wishlistItems]);
 
     const filterProducts = () => {
         let filtered = products;
@@ -76,6 +89,10 @@ const ShopContextProvider = (props)=>{
                 },
             ];
         });
+        toast.success('Added to cart',{
+            autoClose: 1500
+        });
+
     };
 
     const removeFromCart = (productId, size = null) => {
@@ -92,6 +109,56 @@ const ShopContextProvider = (props)=>{
 
     const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     const cartSubtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const clearCart = () => {
+        setCartItems([]);
+    };
+
+    const addToWishlist = (product) => {
+        setWishlistItems(prevItems => {
+            const exists = prevItems.find(item => item._id === product._id);
+            if (exists) return prevItems;
+            return [
+                ...prevItems,
+                {
+                    _id: product._id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    description: product.description,
+                    category: product.category,
+                    subCategory: product.subCategory,
+                    sizes: product.sizes,
+                },
+            ];
+        });
+    };
+
+    const removeFromWishlist = (productId) => {
+        setWishlistItems(prevItems => prevItems.filter(item => item._id !== productId));
+    };
+
+    const isInWishlist = (productId) => {
+        return wishlistItems.some(item => item._id === productId);
+    };
+
+    const filterWishlist = () => {
+        let filtered = wishlistItems;
+
+        if (filters.category.length > 0) {
+            filtered = filtered.filter(item => filters.category.includes(item.category));
+        }
+
+        if (filters.subcategory.length > 0) {
+            filtered = filtered.filter(item => filters.subcategory.includes(item.subCategory));
+        }
+
+        filtered = filtered.filter(item => item.price >= filters.priceRange.min && item.price <= filters.priceRange.max);
+
+        return filtered;
+    };
+
+    const wishlistItemCount = wishlistItems.length;
 
     const value ={
         products: filteredAndSortedProducts,
@@ -112,6 +179,13 @@ const ShopContextProvider = (props)=>{
         updateCartItemQuantity,
         cartItemCount,
         cartSubtotal,
+        clearCart,
+        wishlistItems,
+        addToWishlist,
+        removeFromWishlist,
+        isInWishlist,
+        filterWishlist,
+        wishlistItemCount,
     }
     return (
         <ShopContext.Provider value ={value}>

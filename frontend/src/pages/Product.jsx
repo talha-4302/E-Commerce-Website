@@ -4,10 +4,11 @@ import { ShopContext } from '../context/ShopContext.js'
 import { assets } from '../assets/assets'
 import ProductCard from '../components/ProductCard'
 import { products } from '../assets/assets'
+import { toast } from 'react-toastify'
 
 const Product = () => {
   const { productid } = useParams()
-  const { currency, getProductById, addToCart } = useContext(ShopContext)
+  const { currency, getProductById, addToCart, addToWishlist, isInWishlist } = useContext(ShopContext)
 
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
@@ -21,6 +22,20 @@ const Product = () => {
     if (!product) return;
     const sizeToAdd = selectedSize || product.sizes?.[0] || null;
     addToCart(product, sizeToAdd, 1);
+  }
+
+  const handleAddToWishlist = () => {
+    if (!product) return;
+    if (isInWishlist(product._id)) {
+      toast.info('Already in wishlist',{
+        autoClose:1500,
+      });
+      return;
+    }
+    addToWishlist(product);
+    toast.success('Added to wishlist',{
+      autoClose:1500
+    });
   }
 
   // Dummy reviews data
@@ -149,13 +164,17 @@ const Product = () => {
             </div>
           </div>
 
-          {/* Add to Cart Button */}
-          <button onClick={handleAddToCart} className='w-full md:w-1/2 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors mb-6'>
-            ADD TO CART
-          </button>
+            <button onClick={handleAddToCart} className='w-full md:w-2/5 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors'>
+              ADD TO CART
+            </button>
+
+            {/* Add to Wishlist Button */}
+            <button onClick={handleAddToWishlist} className={`w-full md:w-2/5 md:ml-3 py-3 rounded border transition-colors mt-3 ${isInWishlist(product._id) ? 'border-black bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300 hover:border-gray-400 text-gray-700'}`}>
+              {isInWishlist(product._id) ? 'IN WISHLIST' : 'ADD TO WISHLIST'}
+            </button>
 
           {/* Gray divider line */}
-          <div className='h-[1px] bg-gray-300 mb-4'></div>
+          <div className='mt-3 md:w-4/5 h-[1px] bg-gray-300 mb-4'></div>
 
           {/* Product Characteristics */}
           <div className='space-y-2'>

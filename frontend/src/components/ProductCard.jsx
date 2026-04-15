@@ -12,12 +12,14 @@ const ProductCard = ({ _id, name, price, image, bestseller }) => {
         />
         
       <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
-      <div className='flex flex-col justify-end xl:flex-row xl:justify-between xl:items-end w-full h-full'>
-        <p className=" text-gray-600">${price.toFixed(2)}</p>
+      <div className='flex flex-col justify-end  w-full h-full'>
+        <div>
+          <p className=" text-gray-600">${price.toFixed(2)}</p>
+        </div>
       {bestseller && (
-        <span className=" bg-yellow-500 w-3/4  xl:w-fit text-white text-xs uppercase px-2 py-1 rounded-full">
-          Bestseller
-        </span>
+        <p className=" bg-yellow-500 w-3/4  xl:w-fit text-white text-xs uppercase px-2 py-1 rounded-full">
+          Best Seller
+        </p>
       )}
 
       </div>

@@ -1,17 +1,19 @@
 import React, { useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext.js'
 import { assets } from '../assets/assets'
 
 const Cart = () => {
   const { cartItems, currency, delivery_fee, cartSubtotal, removeFromCart, updateCartItemQuantity } = useContext(ShopContext)
+  const navigate = useNavigate()
   const total = cartSubtotal + delivery_fee
 
   return (
-    <div className='pt-8'>
+    <div className=''>
       <div className='h-[1px] bg-gray-300 mb-8'></div>
 
         <div className ='inline-flex gap-2 items-center mb-20'>
-            <p className='text-3xl text-gray-500'>Your <span className ='text-gray-700 font-medium'>Cart</span></p>
+            <p className='text-3xl text-gray-500'>Shopping <span className ='text-gray-700 font-medium'>Cart</span></p>
             <p className = 'w-8 sm:w-12 h-[1px] sm:h-[2px] bg-gray-700'></p>
         </div>
       {cartItems.length === 0 ? (
@@ -81,7 +83,10 @@ const Cart = () => {
                   <span>{currency}{total}</span>
                 </div>
               </div>
-              <button className='mt-6 ml-auto block bg-black text-white px-5 py-3 rounded hover:bg-gray-800'>
+              <button
+                onClick={() => navigate('/place-order')}
+                className='mt-6 ml-auto block bg-black text-white px-5 py-3 rounded hover:bg-gray-800'
+              >
                 PROCEED TO CHECKOUT
               </button>
             </div>
