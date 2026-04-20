@@ -1,24 +1,17 @@
 import React, { useState } from 'react'
 import { Outlet, useNavigate, NavLink } from 'react-router-dom'
 import { assets } from '../../assets/assets'
-import { useEffect } from 'react'
+import { useContext } from 'react'
+import { ShopContext } from '../../context/ShopContext'
 
 const AdminLayout = () => {
+  const { setAdminToken } = useContext(ShopContext)
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Check auth on mount
-  const isLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true'
-  useEffect(()=>{
-    if (!isLoggedIn) {
-        navigate('/admin/login');
-
-      }
-  },[navigate,isLoggedIn])
-
-
   const handleLogout = () => {
-    sessionStorage.removeItem('adminLoggedIn')
+    setAdminToken('')
+    localStorage.removeItem('adminToken')
     navigate('/admin/login')
   }
 
@@ -62,9 +55,8 @@ const AdminLayout = () => {
       )}
 
       {/* Sidebar */}
-      <aside className={`w-56 bg-white border-r border-gray-200 flex flex-col fixed top-0 left-0 bottom-0 z-40 transition-transform duration-300 ${
-        mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0`}>
+      <aside className={`w-56 bg-white border-r border-gray-200 flex flex-col fixed top-0 left-0 bottom-0 z-40 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}>
         {/* Logo */}
         <div className='p-5 border-b border-gray-100 pt-16 lg:pt-5'>
           <img src={assets.logo} className='w-24' alt='Logo' />
@@ -80,10 +72,9 @@ const AdminLayout = () => {
               end={item.path !== '/admin/dashboard'}
               onClick={() => setMobileMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-5 py-2.5 text-sm transition-colors border-l-[3px] ${
-                  isActive
-                    ? 'border-black bg-gray-50 text-gray-900 font-medium'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                `flex items-center gap-3 px-5 py-2.5 text-sm transition-colors border-l-[3px] ${isActive
+                  ? 'border-black bg-gray-50 text-gray-900 font-medium'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`
               }
             >

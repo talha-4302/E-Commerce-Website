@@ -1,13 +1,16 @@
 import React, { useContext, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, Navigate, NavLink, replace, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets.js'
 import { ShopContext } from '../context/ShopContext.js'
 
 
+
+
 const Navbar = ({ onSearchToggle }) => {
 
-    const { mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible, cartItemCount } = useContext(ShopContext);
+    const { mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible, cartItemCount, setToken } = useContext(ShopContext);
     const [searchOpen, setSearchOpen] = useState(false)
+    const navigate = useNavigate();
 
     const handleSearchToggle = () => {
         const newState = !searchOpen
@@ -15,6 +18,12 @@ const Navbar = ({ onSearchToggle }) => {
         if (onSearchToggle) {
             onSearchToggle(newState)
         }
+    }
+
+    const HandleUserLogout = () => {
+        setToken('');
+        localStorage.removeItem('token');
+        navigate('/');
     }
 
 
@@ -83,7 +92,7 @@ const Navbar = ({ onSearchToggle }) => {
                                 </p>
                             </div>
                             <div className='border-t border-gray-100'>
-                                <p className='flex items-center gap-3 px-5 py-2 text-sm text-red-500 hover:bg-gray-50 transition-colors cursor-pointer'>
+                                <p onClick={HandleUserLogout} className='flex items-center gap-3 px-5 py-2 text-sm text-red-500 hover:bg-gray-50 transition-colors cursor-pointer'>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='w-4 min-w-4'>
                                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                                         <polyline points="16 17 21 12 16 7" />
