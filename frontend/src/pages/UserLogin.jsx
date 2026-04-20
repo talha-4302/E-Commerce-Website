@@ -1,13 +1,33 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useContext } from 'react';
+import { ShopContext } from '../context/ShopContext';
+import { toast } from 'react-toastify';
 
 const UserLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const navigate = useNavigate();
+    const { backendUrl, setToken } = useContext(ShopContext);
+
     const onSubmitHandler = async (event) => {
         event.preventDefault();
-        // Handle login logic
+        try {
+            const response = await axios.post(backendUrl + '/api/user/login', { email, password });
+            if (response.data.success) {
+                setToken(response.data.token);
+                localStorage.setItem('token', response.data.token);
+                toast.success("Welcome back!");
+                navigate('/');
+            } else {
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(error.message);
+        }
     };
 
     return (

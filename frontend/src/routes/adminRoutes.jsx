@@ -8,17 +8,21 @@ import AdminProducts from '../pages/admin/AdminProducts'
 import AdminAddProduct from '../pages/admin/AdminAddProduct'
 import AdminUsers from '../pages/admin/AdminUsers'
 
+import AdminProtectedRoute from '../components/AdminProtectedRoute'
+
 const AdminRoutes = () => {
   return (
     <Routes>
       <Route path='/admin/login' element={<AdminLogin />} />
-      <Route path='/admin' element={<AdminLayout />}>
-        <Route path='dashboard' element={<AdminDashboard />} />
-        <Route path='orders' element={<AdminOrders />} />
-        <Route path='products' element={<AdminProducts />} />
-        <Route path='add-product' element={<AdminAddProduct />} />
-        <Route path='edit-product/:id' element={<AdminAddProduct />} />
-        <Route path='users' element={<AdminUsers />} />
+      <Route element={<AdminProtectedRoute />}>
+        <Route path='/admin' element={<AdminLayout />}>
+          <Route path='dashboard' element={<AdminDashboard />} />
+          <Route path='orders' element={<AdminOrders />} />
+          <Route path='products' element={<AdminProducts />} />
+          <Route path='add-product' element={<AdminAddProduct />} />
+          <Route path='edit-product/:id' element={<AdminAddProduct />} />
+          <Route path='users' element={<AdminUsers />} />
+        </Route>
       </Route>
     </Routes>
   )

@@ -12,6 +12,8 @@ import WishList from '../pages/WishList'
 import UserLogin from '../pages/UserLogin'
 import UserSignup from '../pages/UserSignup'
 
+import UserProtectedRoute from '../components/UserProtectedRoute'
+
 const StoreRoutes = () => {
   return (
     <Routes>
@@ -19,11 +21,11 @@ const StoreRoutes = () => {
       <Route path='/collection' element={<Collection />} />
       <Route path='/about' element={<About />} />
       <Route path='/contact' element={<Contact />} />
-      <Route path='/place-order' element={<PlaceOrder />} />
+      <Route path='/place-order' element={<UserProtectedRoute><PlaceOrder /></UserProtectedRoute>} />
       <Route path='/product/:productid' element={<Product />} />
-      <Route path='/cart' element={<Cart />} />
-      <Route path='/orders' element={<Orders />} />
-      <Route path='/wishlist' element={<WishList />} />
+      <Route path='/cart' element={<UserProtectedRoute><Cart /></UserProtectedRoute>} />
+      <Route path='/orders' element={<UserProtectedRoute><Orders /></UserProtectedRoute>} />
+      <Route path='/wishlist' element={<UserProtectedRoute><WishList /></UserProtectedRoute>} />
       <Route path='/userlogin' element={<UserLogin />} />
       <Route path='/usersignup' element={<UserSignup />} />
     </Routes>

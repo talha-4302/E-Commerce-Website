@@ -3,10 +3,10 @@ import { ShopContext } from "./ShopContext.js";
 import { products } from "../assets/assets";
 import { toast } from "react-toastify";
 
-const ShopContextProvider = (props)=>{
+const ShopContextProvider = (props) => {
 
-    const currency ='$';
-    const delivery_fee =10;
+    const currency = '$';
+    const delivery_fee = 10;
 
     const [filters, setFilters] = useState({
         category: [],
@@ -18,6 +18,11 @@ const ShopContextProvider = (props)=>{
 
     const [mobileFilterVisible, setMobileFilterVisible] = useState(false);
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+
+    const [token, setToken] = useState(() => localStorage.getItem('token') || '');
+    const [adminToken, setAdminToken] = useState(() => localStorage.getItem('adminToken') || '');
+    const backendUrl = "http://localhost:5000";
+
     const [cartItems, setCartItems] = useState([]);
     const [wishlistItems, setWishlistItems] = useState(() => {
         try {
@@ -89,7 +94,7 @@ const ShopContextProvider = (props)=>{
                 },
             ];
         });
-        toast.success('Added to cart',{
+        toast.success('Added to cart', {
             autoClose: 1500
         });
 
@@ -160,7 +165,7 @@ const ShopContextProvider = (props)=>{
 
     const wishlistItemCount = wishlistItems.length;
 
-    const value ={
+    const value = {
         products: filteredAndSortedProducts,
         currency,
         delivery_fee,
@@ -172,6 +177,11 @@ const ShopContextProvider = (props)=>{
         setMobileFilterVisible,
         mobileMenuVisible,
         setMobileMenuVisible,
+        token,
+        setToken,
+        adminToken,
+        setAdminToken,
+        backendUrl,
         getProductById,
         cartItems,
         addToCart,
@@ -188,7 +198,7 @@ const ShopContextProvider = (props)=>{
         wishlistItemCount,
     }
     return (
-        <ShopContext.Provider value ={value}>
+        <ShopContext.Provider value={value}>
             {props.children}
         </ShopContext.Provider>
     )
