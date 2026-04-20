@@ -4,6 +4,7 @@ import { assets } from '../../assets/assets'
 import axios from 'axios'
 import { useContext } from 'react'
 import { ShopContext } from '../../context/ShopContext'
+import { AuthContext } from '../../context/AuthContext'
 import { toast } from 'react-toastify'
 const AdminLogin = () => {
   const navigate = useNavigate()
@@ -11,7 +12,8 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const { backendUrl, setAdminToken } = useContext(ShopContext)
+  const { backendUrl } = useContext(ShopContext)
+  const { setAdminToken } = useContext(AuthContext)
 
   const handleSubmit = async (e) => {
     e.preventDefault()

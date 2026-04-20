@@ -1,21 +1,23 @@
 import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { ShopContext } from '../context/ShopContext';
+import { AuthContext } from '../context/AuthContext';
 
 const AdminProtectedRoute = () => {
-    const { adminToken } = useContext(ShopContext);
+    const { isAdminVerified, isLoading } = useContext(AuthContext);
 
-    // If there is no admin token, redirect to the admin login page
-    if (adminToken) {
-        return <Outlet />;
-
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex justify-center items-center bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            </div>
+        );
     }
-    else {
+
+    if (isAdminVerified) {
+        return <Outlet />;
+    } else {
         return <Navigate to="/admin/login" replace />;
     }
-
-    // If token exists, render child routes
-
 };
 
 export default AdminProtectedRoute;

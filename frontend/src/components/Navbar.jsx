@@ -2,13 +2,15 @@ import React, { useContext, useState } from 'react'
 import { Link, Navigate, NavLink, replace, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets.js'
 import { ShopContext } from '../context/ShopContext.js'
+import { AuthContext } from '../context/AuthContext.jsx'
 
 
 
 
 const Navbar = ({ onSearchToggle }) => {
 
-    const { mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible, cartItemCount, setToken } = useContext(ShopContext);
+    const { mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible, cartItemCount } = useContext(ShopContext);
+    const { token, setToken } = useContext(AuthContext);
     const [searchOpen, setSearchOpen] = useState(false)
     const navigate = useNavigate();
 

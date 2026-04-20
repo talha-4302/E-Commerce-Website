@@ -19,8 +19,6 @@ const ShopContextProvider = (props) => {
     const [mobileFilterVisible, setMobileFilterVisible] = useState(false);
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
-    const [token, setToken] = useState(() => localStorage.getItem('token') || '');
-    const [adminToken, setAdminToken] = useState(() => localStorage.getItem('adminToken') || '');
     const backendUrl = "http://localhost:5000";
 
     const [cartItems, setCartItems] = useState([]);
@@ -177,10 +175,7 @@ const ShopContextProvider = (props) => {
         setMobileFilterVisible,
         mobileMenuVisible,
         setMobileMenuVisible,
-        token,
-        setToken,
-        adminToken,
-        setAdminToken,
+
         backendUrl,
         getProductById,
         cartItems,

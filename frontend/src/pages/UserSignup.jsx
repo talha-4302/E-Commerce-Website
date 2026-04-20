@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useContext } from 'react';
 import { ShopContext } from '../context/ShopContext';
+import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
 const UserSignup = () => {
@@ -11,7 +12,8 @@ const UserSignup = () => {
     const [password, setPassword] = useState('');
 
     const navigate = useNavigate();
-    const { backendUrl, setToken } = useContext(ShopContext);
+    const { backendUrl } = useContext(ShopContext);
+    const { setToken } = useContext(AuthContext);
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();

@@ -8,17 +8,24 @@ const app = express()
 
 const port = process.env.PORT || 4000
 
+
+//db connection
 connectDB();
 
 
-//middleware
-app.use(express.json())
-app.use(cors())
+//middleware:
 
+//  app.use: for every request ,before it reaches the [final-point/when it goes to 
+// the response function],go through this function 
+app.use(cors()) //allow from all origins
 
+app.use(express.json()) //turn request body into json(object mybe)
 
 app.use('/api/user', userRouter)
 
+
+
+//response
 app.get('/', (req, res) => {
     res.send("API WORKING")
 })

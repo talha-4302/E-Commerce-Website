@@ -13,7 +13,7 @@ const loginUser = async (req, res) => {
 
         // Query user by email
         const [rows] = await db.execute("SELECT * FROM users WHERE email = ? LIMIT 1", [email]);
-        
+
         if (rows.length === 0) {
             return res.json({ success: false, message: "User doesn't exist" });
         }
@@ -39,7 +39,7 @@ const registerUser = async (req, res) => {
 
         // Check if user already exists
         const [exists] = await db.execute("SELECT id FROM users WHERE email = ? LIMIT 1", [email]);
-        
+
         if (exists.length > 0) {
             return res.json({ success: false, message: "User already exists" });
         }
@@ -48,7 +48,7 @@ const registerUser = async (req, res) => {
         if (!validator.isEmail(email)) {
             return res.json({ success: false, message: "Please enter a valid email" });
         }
-        if (password.length < 8) {
+        if (password.length < 4) {
             return res.json({ success: false, message: "Please enter a strong password" });
         }
 
@@ -101,4 +101,9 @@ const adminLogin = async (req, res) => {
     }
 }
 
-export { loginUser, registerUser, adminLogin };
+const verifyToken = async (req, res) => {
+    // If the middleware passed, the token is valid
+    res.json({ success: true, message: "Token is valid" });
+}
+
+export { loginUser, registerUser, adminLogin, verifyToken };

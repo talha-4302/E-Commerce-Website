@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { Outlet, useNavigate, NavLink } from 'react-router-dom'
 import { assets } from '../../assets/assets'
 import { useContext } from 'react'
-import { ShopContext } from '../../context/ShopContext'
+import { AuthContext } from '../../context/AuthContext'
 
 const AdminLayout = () => {
-  const { setAdminToken } = useContext(ShopContext)
+  const { setAdminToken } = useContext(AuthContext)
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
