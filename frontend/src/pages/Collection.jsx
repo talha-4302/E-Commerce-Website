@@ -1,27 +1,16 @@
-import React, { useContext, useMemo } from 'react'
+import React, { useContext } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { ShopContext } from '../context/ShopContext'
+import { ProductContext } from '../context/ProductContext.js'
+import { ShopContext } from '../context/ShopContext.js'
 import ProductCard from '../components/ProductCard'
 import { assets } from '../assets/assets.js'
 import Filter from '../components/Filter.jsx'
 
 const Collection = () => {
-  const { products, sortBy, setSortBy, mobileFilterVisible, setMobileFilterVisible } = useContext(ShopContext)
+  const { products, loading, filters, setFilters, sortBy, setSortBy } = useContext(ProductContext)
+  const { mobileFilterVisible, setMobileFilterVisible } = useContext(ShopContext)
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') || ''
-
-  // Filter products based on search query
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products
-    
-    const query = searchQuery.toLowerCase()
-    return products.filter(product => 
-      product.name.toLowerCase().includes(query) ||
-      product.description?.toLowerCase().includes(query) ||
-      product.category?.toLowerCase().includes(query) ||
-      product.subcategory?.toLowerCase().includes(query)
-    )
-  }, [products, searchQuery])
 
   const handleDropFilters = () => {
     setMobileFilterVisible(prev => !prev);
@@ -35,12 +24,15 @@ const Collection = () => {
   return (
     <div className={`flex flex-col lg:flex-row gap-1 lg:gap-10 ${mobileFilterVisible ? 'overflow-hidden fixed w-full h-full lg:h-auto lg:w-auto lg:static z-40 bg-white' : ''} relative`}>
 
-      <Filter />
+      <Filter
+        filters={filters}
+        setFilters={setFilters}
+        mobileFilterVisible={mobileFilterVisible}
+        setMobileFilterVisible={setMobileFilterVisible}
+      />
 
       {/* Main Content */}
       <div className='flex-1 w-full p-4 lg:p-6'>
-
-
 
         {/* Header with Sort */}
         <div className='flex flex-col lg:flex-row gap-4 mb-6'>
@@ -66,7 +58,9 @@ const Collection = () => {
               className='w-[160px] min-w-[160px] max-w-[200px] whitespace-normal border border-gray-300 px-4 py-2 rounded sm:flex-none'
             >
               <option value=''>Sort By</option>
-              <option value='date'>Newest Arrivals</option>
+              <option value='newest'>Newest Arrivals</option>
+              <option value='price_asc'>Price: Low to High</option>
+              <option value='price_desc'>Price: High to Low</option>
             </select>
           </div>
         </div>
@@ -75,27 +69,35 @@ const Collection = () => {
           <div className='mb-4'>
             <p className='text-sm text-gray-600'>
               Showing results for "<span className='font-medium text-gray-800'>{searchQuery}</span>"
-              <span className='ml-2 text-gray-400'>({filteredProducts.length} {filteredProducts.length === 1 ? 'result' : 'results'})</span>
+              <span className='ml-2 text-gray-400'>({products.length} {products.length === 1 ? 'result' : 'results'})</span>
             </p>
           </div>
         )}
 
-        {/* Products Grid */}
-        <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
-          {filteredProducts.map(product => (
-            <ProductCard
-              key={product._id}
-              _id={product._id}
-              name={product.name}
-              price={product.price}
-              image={product.image[0]}
-              bestseller={product.bestseller}
-            />
-          ))}
-        </div>
+        {/* Loading Spinner */}
+        {loading ? (
+          <div className='flex justify-center items-center py-20'>
+            <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black'></div>
+          </div>
+        ) : (
+          /* Products Grid */
+          <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+            {products.map(product => (
+              <ProductCard
+                key={product._id}
+                _id={product._id}
+                name={product.name}
+                price={product.price}
+                image={product.image[0]}
+                bestseller={product.bestseller}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 export default Collection
+

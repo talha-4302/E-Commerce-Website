@@ -3,20 +3,67 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext.js'
 import { assets } from '../assets/assets'
 import ProductCard from '../components/ProductCard'
-import { products } from '../assets/assets'
+import axios from 'axios'
 import { toast } from 'react-toastify'
 
 const Product = () => {
   const { productid } = useParams()
-  const { currency, getProductById, addToCart, addToWishlist, isInWishlist } = useContext(ShopContext)
+  const { currency, addToCart, addToWishlist, isInWishlist, backendUrl } = useContext(ShopContext)
 
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
+  const [relatedProducts, setRelatedProducts] = useState([])
 
-  useEffect(()=>{window.scrollTo(0,0)}, [productid]);
+  // ---------------------------------------------------------------
+  // Data Fetching: Freshness over Speed (Choice 2)
+  //
+  // Pattern: Resource Fetching
+  // We fetch the full product object (images, sizes, etc.) 
+  // directly from the source of truth (/api/product/single/:id).
+  // ---------------------------------------------------------------
+  const fetchProductData = async () => {
+    setLoading(true)
+    try {
+      const response = await axios.get(`${backendUrl}/api/product/single/${productid}`)
+      if (response.data.success) {
+        const p = response.data.product
+        // Normalize: backend uses id, image array is 'images'
+        const normalizedProduct = {
+          ...p,
+          _id: p.id,
+          image: p.images || []
+        }
+        setProduct(normalizedProduct)
+        
+        // Fetch related products (using the same category)
+        const relatedResponse = await axios.get(`${backendUrl}/api/product/list?category=${p.category}`)
+        if (relatedResponse.data.success) {
+          const related = relatedResponse.data.products
+            .filter(item => item.id !== p.id)
+            .slice(0, 4)
+            .map(item => ({
+              ...item,
+              _id: item.id,
+              image: item.image ? [item.image] : []
+            }))
+          setRelatedProducts(related)
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error)
+      toast.error("Failed to load product details")
+    } finally {
+      setLoading(false)
+    }
+  }
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    fetchProductData()
+  }, [productid])
 
-  const product = getProductById(productid)
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -66,6 +113,14 @@ const Product = () => {
     }
   ]
 
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center py-40'>
+        <div className='animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-black'></div>
+      </div>
+    )
+  }
+
   if (!product) {
     return (
       <div className='text-center py-20'>
@@ -73,11 +128,6 @@ const Product = () => {
       </div>
     )
   }
-
-  // Get related products (same category, exclude current product)
-  const relatedProducts = products.filter(p =>
-    p.category === product.category && p._id !== product._id
-  ).slice(0, 4)
 
   return (
     <div className='  transition-opacity ease-in duration-500 opacity-100'>
@@ -105,9 +155,8 @@ const Product = () => {
 
           {/* Main Image */}
           <div className='flex-1'>
-            {product.image[selectedImage]? null : setSelectedImage(0)}
             <img
-              src={  product.image[selectedImage] }
+              src={ product.image[selectedImage] || product.image[0] }
               alt={product.name}
               className='w-full h-[80%] object-cover rounded'
             />
@@ -148,7 +197,7 @@ const Product = () => {
           <div className='mb-6'>
             <p className='text-sm font-medium text-gray-700 mb-3'>Select Size</p>
             <div className='flex gap-3'>
-              {product.sizes.map((size) => (
+              {product.sizes && product.sizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
@@ -212,23 +261,26 @@ const Product = () => {
       </div>
 
       {/* Related Products Section */}
-      <div>
-        <h2 className='text-2xl font-bold text-gray-800 mb-6'>You May Also Like</h2>
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6'>
-          {relatedProducts.map((relatedProduct) => (
-            <ProductCard
-              key={relatedProduct._id}
-              _id={relatedProduct._id}
-              name={relatedProduct.name}
-              price={relatedProduct.price}
-              image={relatedProduct.image[0]}
-              bestseller={relatedProduct.bestseller}
-            />
-          ))}
+      {relatedProducts.length > 0 && (
+        <div>
+          <h2 className='text-2xl font-bold text-gray-800 mb-6'>You May Also Like</h2>
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6'>
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard
+                key={relatedProduct._id}
+                _id={relatedProduct._id}
+                name={relatedProduct.name}
+                price={relatedProduct.price}
+                image={relatedProduct.image[0]}
+                bestseller={relatedProduct.bestseller}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
 
 export default Product
+

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useContext } from 'react';
-import { ShopContext } from '../context/ShopContext';
 import { AuthContext } from '../context/AuthContext';
+
 import { toast } from 'react-toastify';
 
 const UserLogin = () => {
@@ -11,8 +11,8 @@ const UserLogin = () => {
     const [password, setPassword] = useState('');
 
     const navigate = useNavigate();
-    const { backendUrl } = useContext(ShopContext);
-    const { setToken } = useContext(AuthContext);
+    const { backendUrl, setToken } = useContext(AuthContext);
+
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();

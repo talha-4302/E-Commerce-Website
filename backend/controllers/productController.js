@@ -63,7 +63,7 @@ const listProducts = async (req, res) => {
 
         // --- Build ORDER BY clause ---
         // We pick from a safe whitelist — never inject user input directly.
-        let orderBy = "ORDER BY p.id DESC"; // default: newest first
+        let orderBy = "ORDER BY p.id "; // default: newest first
         if (sortBy === "price_asc") orderBy = "ORDER BY p.price ASC";
         else if (sortBy === "price_desc") orderBy = "ORDER BY p.price DESC";
         else if (sortBy === "newest") orderBy = "ORDER BY p.created_at DESC";
@@ -127,7 +127,7 @@ const getProductById = async (req, res) => {
         );
 
         // Stitch the related data onto the product object
-        product.images = imageRows.map((r) => r.image_url);
+        product.images = imageRows.map((r) => "/assets/" + r.image_url);
         product.sizes = sizeRows.map((r) => r.size);
 
         res.json({ success: true, product });
@@ -150,7 +150,7 @@ const getLatestProducts = async (req, res) => {
                 (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1) AS image
             FROM products p
             ORDER BY p.created_at DESC
-            LIMIT 10
+            LIMIT 8
         `;
 
         const [rows] = await db.execute(query);

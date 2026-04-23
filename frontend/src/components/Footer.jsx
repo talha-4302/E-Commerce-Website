@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { assets } from '../assets/assets'
 
 const Footer = () => {
+  console.log("FOOTER RE-RENDERS");
   return (
     <footer className='my-16 py-8 bg-white w-full '>
       <div className='mx-auto max-w-6xl px-4'>

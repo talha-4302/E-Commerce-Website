@@ -17,7 +17,8 @@ It will replace the static `products` array with an Axios call to our new `/api/
 **State to Manage:**
 - `products`: `[]` (Array of objects from backend)
 - `loading`: `false` (For showing a spinner while fetching)
-- `filters`: `{ category: [], subcategory: [], priceRange: {min: 0, max: 1000} }`
+- `filters`: `{ category: [], subcategory: [], priceRange: {min: 0, max: 1000} }` (State to drive the UI and API calls)
+- `setFilters`: (Updater function for components like `Filter.jsx`)
 - `sortBy`: `'default'`
 
 **Key Function:** `fetchProducts()`
@@ -46,6 +47,8 @@ We will aggressively delete code from this file to clean it up.
 
 > [!NOTE]
 > Currently, your `addToCart` and `addToWishlist` functions clone the product data (name, price, image) directly into the state. This means `ShopContext` actually doesn't *need* access to the main products array anymore once the item is added. It is completely decoupled!
+> 
+> **Wishlist Filtering Note:** If the Wishlist page needs filters, we should avoid using the global `ProductContext.filters` (which are for the whole catalog). Instead, we can implement a simple frontend filter on the `wishlistItems` array directly in the `Wishlist.jsx` page component to keep the discovery experience and personal wishlist experience separate.
 
 ---
 
@@ -69,19 +72,17 @@ We will wrap the app in the new provider so both Contexts are available everywhe
 We need to go through the pages and point them to the correct context.
 
 *   **`Collection.jsx` & `Home.jsx`:** Instead of getting `products` from `ShopContext`, they will now do: `const { products, loading } = useContext(ProductContext);`
-*   **`Filter.jsx` (or the filter sidebar):** Will pull `setFilters` and `setSortBy` from `ProductContext`.
-*   **`Product.jsx` (Single Product Page):** Since it needs full details (all sizes, all images), we won't get it from the context array. Instead, we'll write a `useEffect` inside `Product.jsx` that calls `axios.get('/api/product/single/:id')` directly on mount.
+*   **`Filter.jsx` (or the filter sidebar):** Will pull `filters`, `setFilters`, and `setSortBy` from `ProductContext`. This ensures the UI stays in sync with the current active filters.
+*   **`Product.jsx` (Single Product Page):** We have confirmed **Choice 2 (Backend Fetch)**. Since it needs full details (all sizes, all images), we won't get it from the context array. Instead, we'll write a `useEffect` inside `Product.jsx` that calls `axios.get('/api/product/single/:id')` directly on mount. This ensures 100% data freshness even if the product was filtered out of the main list in another tab.
 
 ---
 
 ## Tradeoff Discussion (Open Question for You)
 
 > [!IMPORTANT]  
-> **Question regarding single products:** 
-> When a user clicks on a product to view its details (`Product.jsx`), we have two choices:
-> 1. Find the product in the local `ProductContext.products` array and show it instantly.
-> 2. Show a quick loader and fetch the fresh data directly from the backend via `/api/product/single/:id`.
+> **Question regarding single products: RESOLVED (Choice 2)** 
+> We decided to fetch fresh data directly from the backend via `/api/product/single/:id`.
 > 
-> **The Tradeoff:** Choice 1 is instant but might lack the extra images/sizes if our List API only brought back a thumbnail. Choice 2 takes 100ms longer but guarantees 100% fresh, complete data. 
-> 
-> Which approach do you prefer, and why?
+> **The Rationale:** 
+> 1. **Data Completeness:** The list API might only return thumbnails. The single API returns the full object (all images, full description, specific stock/sizes).
+> 2. **Consistency:** If a user filters the products in one tab, the local `products` array changes. If they are viewing a product in another tab, we don't want the UI to break just because that product "disappeared" from the filtered list. The detail page should be its own source of truth.

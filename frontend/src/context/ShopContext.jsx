@@ -1,27 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { ShopContext } from "./ShopContext.js";
-import { products } from "../assets/assets";
+import { AuthContext } from "./AuthContext.jsx";
 import { toast } from "react-toastify";
 
+// ---------------------------------------------------------------
+// ShopContext — The "Session" Layer
+//
+// Responsible for:
+//   1. User's Shopping Cart (in-memory)
+//   2. User's Wishlist (synced to LocalStorage)
+//   3. Shared UI state (mobile menu, currency settings)
+//
+// Pattern: Single Responsibility Principle
+// We removed all product catalog logic to ProductContext.
+// This context now ONLY cares about the user's interaction.
+// ---------------------------------------------------------------
 const ShopContextProvider = (props) => {
 
+    const { backendUrl } = useContext(AuthContext);
     const currency = '$';
     const delivery_fee = 10;
 
-    const [filters, setFilters] = useState({
-        category: [],
-        subcategory: [],
-        priceRange: { min: 0, max: 1000 }
-    });
 
-    const [sortBy, setSortBy] = useState('default');
-
+    // --- UI State ---
     const [mobileFilterVisible, setMobileFilterVisible] = useState(false);
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
-    const backendUrl = "http://localhost:5000";
-
+    // --- Cart State ---
     const [cartItems, setCartItems] = useState([]);
+
+    // --- Wishlist State (Sync to LocalStorage) ---
     const [wishlistItems, setWishlistItems] = useState(() => {
         try {
             const saved = localStorage.getItem('wishlist');
@@ -31,39 +39,20 @@ const ShopContextProvider = (props) => {
         }
     });
 
+    // --- Wishlist Local Filtering ---
+    // This allows users to filter their personal wishlist without 
+    // affecting the main store catalog.
+    const [wishlistFilters, setWishlistFilters] = useState({
+        category: [],
+        subcategory: [],
+        priceRange: { min: 0, max: 1000 }
+    });
+
     useEffect(() => {
         localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
     }, [wishlistItems]);
 
-    const filterProducts = () => {
-        let filtered = products;
-
-        if (filters.category.length > 0) {
-            filtered = filtered.filter(product => filters.category.includes(product.category));
-        }
-
-        if (filters.subcategory.length > 0) {
-            filtered = filtered.filter(product => filters.subcategory.includes(product.subCategory));
-        }
-
-        filtered = filtered.filter(product => product.price >= filters.priceRange.min && product.price <= filters.priceRange.max);
-
-        return filtered;
-    };
-
-    const sortProducts = (products) => {
-        if (sortBy === 'date') {
-            return [...products].sort((a, b) => b.date - a.date);
-        }
-        return products;
-    };
-
-    const filteredAndSortedProducts = sortProducts(filterProducts());
-
-    const getProductById = (id) => {
-        return products.find(product => product._id === id);
-    };
-
+    // --- Cart Logic ---
     const addToCart = (product, size = null, quantity = 1) => {
         const selectedSize = size || product.sizes?.[0] || null;
         setCartItems(prevItems => {
@@ -95,7 +84,6 @@ const ShopContextProvider = (props) => {
         toast.success('Added to cart', {
             autoClose: 1500
         });
-
     };
 
     const removeFromCart = (productId, size = null) => {
@@ -117,6 +105,7 @@ const ShopContextProvider = (props) => {
         setCartItems([]);
     };
 
+    // --- Wishlist Logic ---
     const addToWishlist = (product) => {
         setWishlistItems(prevItems => {
             const exists = prevItems.find(item => item._id === product._id);
@@ -148,15 +137,15 @@ const ShopContextProvider = (props) => {
     const filterWishlist = () => {
         let filtered = wishlistItems;
 
-        if (filters.category.length > 0) {
-            filtered = filtered.filter(item => filters.category.includes(item.category));
+        if (wishlistFilters.category.length > 0) {
+            filtered = filtered.filter(item => wishlistFilters.category.includes(item.category));
         }
 
-        if (filters.subcategory.length > 0) {
-            filtered = filtered.filter(item => filters.subcategory.includes(item.subCategory));
+        if (wishlistFilters.subcategory.length > 0) {
+            filtered = filtered.filter(item => wishlistFilters.subcategory.includes(item.subCategory));
         }
 
-        filtered = filtered.filter(item => item.price >= filters.priceRange.min && item.price <= filters.priceRange.max);
+        filtered = filtered.filter(item => item.price >= wishlistFilters.priceRange.min && item.price <= wishlistFilters.priceRange.max);
 
         return filtered;
     };
@@ -164,20 +153,17 @@ const ShopContextProvider = (props) => {
     const wishlistItemCount = wishlistItems.length;
 
     const value = {
-        products: filteredAndSortedProducts,
         currency,
         delivery_fee,
-        filters,
-        setFilters,
-        sortBy,
-        setSortBy,
+        backendUrl,
+        
+        // UI
         mobileFilterVisible,
         setMobileFilterVisible,
         mobileMenuVisible,
         setMobileMenuVisible,
 
-        backendUrl,
-        getProductById,
+        // Cart
         cartItems,
         addToCart,
         removeFromCart,
@@ -185,13 +171,18 @@ const ShopContextProvider = (props) => {
         cartItemCount,
         cartSubtotal,
         clearCart,
+
+        // Wishlist
         wishlistItems,
+        wishlistFilters,
+        setWishlistFilters,
         addToWishlist,
         removeFromWishlist,
         isInWishlist,
         filterWishlist,
         wishlistItemCount,
     }
+    
     return (
         <ShopContext.Provider value={value}>
             {props.children}
@@ -200,3 +191,4 @@ const ShopContextProvider = (props) => {
 }
 
 export default ShopContextProvider;
+

@@ -3,9 +3,11 @@ import { assets } from '../assets/assets'
 
 const Hero = () => {
   return (
-    <div className='flex flex-col sm:flex-row  rounded-md border border-gray-400'>
+    < div className='flex flex-col sm:flex-row  rounded-md border border-gray-400' >
       {/* Hero left side*/}
-      <div className='w-full sm:w-1/2 flex items-center justify-center py-10 sm:py-0'>
+      {console.log("HERO RE-Renders")}
+
+      < div className='w-full sm:w-1/2 flex items-center justify-center py-10 sm:py-0' >
         <div className='text-[#414141]'>
           <div className='flex items-center gap-2'>
             <p className='w-8 md:w-11 h-[2px] bg-[#414141]'></p>
@@ -17,14 +19,14 @@ const Hero = () => {
             <p className='w-8 md:w-11 h-[2px] bg-[#414141]'></p>
           </div>
         </div>
-      </div>
+      </div >
       {/* HERO RIGHT SIDE */}
-      <img className='w-full  sm:w-1/2' src={assets.hero_img3}></img>
+      < img className='w-full  sm:w-1/2' src={assets.hero_img3} ></img >
 
 
 
 
-    </div>
+    </div >
   )
 }
 
