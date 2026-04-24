@@ -15,8 +15,7 @@ const authUser = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_jwt_secret");
         
         // Pass the user ID to the next middleware or controller
-        if (!req.body) req.body = {};
-        req.body.userId = decoded.id;
+        req.userId = decoded.id;
         
         next();
     } catch (error) {
@@ -49,8 +48,7 @@ const authAdmin = async (req, res, next) => {
              return res.json({ success: false, message: "Not Authorized as Admin" });
         }
         
-        if (!req.body) req.body = {};
-        req.body.userId = decoded.id;
+        req.userId = decoded.id;
         next();
     } catch (error) {
         console.log(error);

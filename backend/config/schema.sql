@@ -51,7 +51,8 @@ CREATE TABLE cart_items (
     size VARCHAR(10),
     quantity INT DEFAULT 1,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_cart_entry (user_id, product_id, size)
 );
 
 -- Wishlist Items Table
@@ -60,18 +61,17 @@ CREATE TABLE wishlist_items (
     user_id INT,
     product_id INT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_wishlist_entry (user_id, product_id)
 );
 
 -- Orders Table
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    order_number VARCHAR(50) UNIQUE NOT NULL,
     user_id INT,
     total_amount DECIMAL(10, 2) NOT NULL,
     status ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
     payment_method VARCHAR(50),
-    payment_status TINYINT(1) DEFAULT 0,
     shipping_address TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL

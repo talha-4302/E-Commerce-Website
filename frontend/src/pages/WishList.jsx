@@ -1,4 +1,4 @@
-import React, { useContext, } from 'react'
+import React, { useContext, useState, } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Filter from '../components/Filter.jsx'
@@ -19,14 +19,16 @@ const WishList = () => {
     setWishlistFilters
   } = useContext(ShopContext)
 
+  const [selectedSizes, setSelectedSizes] = useState({})
+
 
   const filteredWishlist = filterWishlist()
 
 
 
   const handleAddToCart = (product) => {
-    addToCart(product)
-    toast.success('Added to cart')
+    const size = selectedSizes[product._id] || product.sizes?.[0] || null;
+    addToCart(product, size, 1)
     removeFromWishlist(product._id)
   }
 
@@ -92,6 +94,23 @@ const WishList = () => {
                       <Link to={`/product/${item._id}`}><p className='hover:underline font-semibold text-gray-900 text-lg truncate'>{item.name}</p></Link>
                       <p className='text-sm text-gray-500 mt-2 line-clamp-2'>{item.description}</p>
                       <p className='text-xl font-medium text-gray-900 mt-3'>{currency}{item.price}</p>
+
+                      {item.sizes && item.sizes.length > 0 && (
+                        <div className='flex gap-2 mt-3'>
+                          {item.sizes.map((size) => (
+                            <button
+                              key={size}
+                              onClick={() => setSelectedSizes(prev => ({ ...prev, [item._id]: size }))}
+                              className={`px-3 py-1 border rounded text-sm transition-all ${selectedSizes[item._id] === size
+                                  ? 'border-black bg-black text-white'
+                                  : 'border-gray-300 hover:border-gray-400 text-gray-600'
+                                }`}
+                            >
+                              {size}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Actions */}

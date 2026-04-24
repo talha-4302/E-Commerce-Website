@@ -5,9 +5,11 @@ import { assets } from '../assets/assets'
 import ProductCard from '../components/ProductCard'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { AuthContext } from '../context/AuthContext.jsx'
 
 const Product = () => {
   const { productid } = useParams()
+  const { isUserVerified } = useContext(AuthContext)
   const { currency, addToCart, addToWishlist, isInWishlist, backendUrl } = useContext(ShopContext)
 
   const [product, setProduct] = useState(null)
@@ -36,7 +38,7 @@ const Product = () => {
           image: p.images || []
         }
         setProduct(normalizedProduct)
-        
+
         // Fetch related products (using the same category)
         const relatedResponse = await axios.get(`${backendUrl}/api/product/list?category=${p.category}`)
         if (relatedResponse.data.success) {
@@ -66,23 +68,30 @@ const Product = () => {
 
 
   const handleAddToCart = () => {
-    if (!product) return;
-    const sizeToAdd = selectedSize || product.sizes?.[0] || null;
-    addToCart(product, sizeToAdd, 1);
+    if (isUserVerified) {
+      if (!product) return;
+      const sizeToAdd = selectedSize || product.sizes?.[0] || null;
+      addToCart(product, sizeToAdd, 1);
+    }
+    else {
+      toast.error("Please log in first")
+    }
+
   }
 
   const handleAddToWishlist = () => {
+    if (!isUserVerified) {
+      toast.error("Please log in first")
+      return;
+    }
     if (!product) return;
     if (isInWishlist(product._id)) {
-      toast.info('Already in wishlist',{
-        autoClose:1500,
+      toast.info('Already in wishlist', {
+        autoClose: 1500,
       });
       return;
     }
     addToWishlist(product);
-    toast.success('Added to wishlist',{
-      autoClose:1500
-    });
   }
 
   // Dummy reviews data
@@ -145,9 +154,8 @@ const Product = () => {
                 key={index}
                 src={img}
                 alt={`Product ${index + 1}`}
-                className={`w-[20%] sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0 object-cover rounded cursor-pointer border-2 ${
-                  selectedImage === index ? 'border-black' : 'border-gray-200'
-                }`}
+                className={`w-[20%] sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0 object-cover rounded cursor-pointer border-2 ${selectedImage === index ? 'border-black' : 'border-gray-200'
+                  }`}
                 onClick={() => setSelectedImage(index)}
               />
             ))}
@@ -156,7 +164,7 @@ const Product = () => {
           {/* Main Image */}
           <div className='flex-1'>
             <img
-              src={ product.image[selectedImage] || product.image[0] }
+              src={product.image[selectedImage] || product.image[0]}
               alt={product.name}
               className='w-full h-[80%] object-cover rounded'
             />
@@ -201,11 +209,10 @@ const Product = () => {
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 border rounded ${
-                    selectedSize === size
-                      ? 'border-black bg-black text-white'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
+                  className={`px-4 py-2 border rounded ${selectedSize === size
+                    ? 'border-black bg-black text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                    }`}
                 >
                   {size}
                 </button>
@@ -213,14 +220,14 @@ const Product = () => {
             </div>
           </div>
 
-            <button onClick={handleAddToCart} className='w-full md:w-2/5 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors'>
-              ADD TO CART
-            </button>
+          <button onClick={handleAddToCart} className='w-full md:w-2/5 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors'>
+            ADD TO CART
+          </button>
 
-            {/* Add to Wishlist Button */}
-            <button onClick={handleAddToWishlist} className={`w-full md:w-2/5 md:ml-3 py-3 rounded border transition-colors mt-3 ${isInWishlist(product._id) ? 'border-black bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300 hover:border-gray-400 text-gray-700'}`}>
-              {isInWishlist(product._id) ? 'IN WISHLIST' : 'ADD TO WISHLIST'}
-            </button>
+          {/* Add to Wishlist Button */}
+          <button onClick={handleAddToWishlist} className={`w-full md:w-2/5 md:ml-3 py-3 rounded border transition-colors mt-3 ${isInWishlist(product._id) ? 'border-black bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300 hover:border-gray-400 text-gray-700'}`}>
+            {isInWishlist(product._id) ? 'IN WISHLIST' : 'ADD TO WISHLIST'}
+          </button>
 
           {/* Gray divider line */}
           <div className='mt-3 md:w-4/5 h-[1px] bg-gray-300 mb-4'></div>
