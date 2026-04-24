@@ -6,7 +6,7 @@ const ProductCard = ({ _id, name, price, image, bestseller }) => {
 
     <Link to={`/product/${_id}`} className=" rounded-lg p-4 flex flex-col  items-center gap-2 shadow-md hover:scale-102 transition-transform  ">
       <img
-        src={`/assets/${image}`}
+        src={image}
         alt={name}
         className="w-full h-full object-contain rounded-md mb-2"
       />

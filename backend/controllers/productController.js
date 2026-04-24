@@ -127,7 +127,7 @@ const getProductById = async (req, res) => {
         );
 
         // Stitch the related data onto the product object
-        product.images = imageRows.map((r) => "/assets/" + r.image_url);
+        product.images = imageRows.map((r) => r.image_url);
         product.sizes = sizeRows.map((r) => r.size);
 
         res.json({ success: true, product });

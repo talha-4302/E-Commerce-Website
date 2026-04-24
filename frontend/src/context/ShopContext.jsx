@@ -52,6 +52,10 @@ const ShopContextProvider = (props) => {
         localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
     }, [wishlistItems]);
 
+
+
+
+
     // --- Cart Logic ---
     const addToCart = (product, size = null, quantity = 1) => {
         const selectedSize = size || product.sizes?.[0] || null;
@@ -126,6 +130,11 @@ const ShopContextProvider = (props) => {
         });
     };
 
+
+
+
+    //wishlist
+
     const removeFromWishlist = (productId) => {
         setWishlistItems(prevItems => prevItems.filter(item => item._id !== productId));
     };
@@ -152,11 +161,20 @@ const ShopContextProvider = (props) => {
 
     const wishlistItemCount = wishlistItems.length;
 
+
+
+
+
+
+
+
+
+
     const value = {
         currency,
         delivery_fee,
         backendUrl,
-        
+
         // UI
         mobileFilterVisible,
         setMobileFilterVisible,
@@ -182,7 +200,7 @@ const ShopContextProvider = (props) => {
         filterWishlist,
         wishlistItemCount,
     }
-    
+
     return (
         <ShopContext.Provider value={value}>
             {props.children}
