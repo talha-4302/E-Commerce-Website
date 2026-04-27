@@ -19,6 +19,12 @@ const loginUser = async (req, res) => {
         }
 
         const user = rows[0];
+
+        // Check if user is banned
+        if (user.account_status === 'banned') {
+            return res.json({ success: false, message: "Your account has been suspended." });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (isMatch) {
