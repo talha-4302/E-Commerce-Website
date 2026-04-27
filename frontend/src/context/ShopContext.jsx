@@ -119,7 +119,7 @@ const ShopContextProvider = (props) => {
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (response.data.success) {
-                    toast.success('Added to cart', { autoClose: 1500 });
+                    toast.success('Added to cart', { autoClose: 1000 });
                     fetchCart();
                 } else {
                     toast.error(response.data.message);

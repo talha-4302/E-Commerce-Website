@@ -7,7 +7,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true)
 
   const loadOrderData = async () => {
-    setLoading(true)
+    setLoading(true) //*t kept for future: if need for re-fetching (e.g. user placed a new order & wants to see it immediately)
     const data = await fetchOrders()
     setOrders(data)
     setLoading(false)

@@ -1,5 +1,5 @@
 -- E-Commerce Project Database Schema
--- Last Updated: 2026-04-21
+-- Last Updated: 2026-04-24
 
 -- Users Table
 CREATE TABLE users (
@@ -70,7 +70,7 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     total_amount DECIMAL(10, 2) NOT NULL,
-    status ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
+    status ENUM('Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled') DEFAULT 'Pending',
     payment_method VARCHAR(50),
     shipping_address TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

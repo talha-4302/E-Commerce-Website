@@ -27,7 +27,7 @@ const statusColors = {
 
 // Pick 6 bestseller products from existing data
 const bestSellers = products
-  .filter(p => p.bestSeller)
+  .filter(p => p.bestseller)
   .slice(0, 6)
   .map((p, i) => ({ ...p, sold: [142, 118, 96, 87, 74, 63][i] || 50 }))
 
