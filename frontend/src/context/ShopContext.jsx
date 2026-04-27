@@ -82,19 +82,23 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    const fetchOrders = async () => {
-        if (!token) return [];
+    const fetchOrders = async (page = 1, limit = 10) => {
+        if (!token) return { orders: [], pagination: null };
         try {
-            const response = await axios.get(backendUrl + '/api/order', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await axios.get(
+                `${backendUrl}/api/order?page=${page}&limit=${limit}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             if (response.data.success) {
-                return response.data.orders;
+                return {
+                    orders: response.data.orders,
+                    pagination: response.data.pagination
+                };
             }
-            return [];
+            return { orders: [], pagination: null };
         } catch (error) {
             console.error("Fetch Orders Error", error);
-            return [];
+            return { orders: [], pagination: null };
         }
     };
 

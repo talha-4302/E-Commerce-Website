@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext'
 import { adminGet, adminDelete } from '../../utils/adminApi'
 import useDebounce from '../../hooks/useDebounce'
 import { toast } from 'react-toastify'
+import Pagination from '../../components/Pagination.jsx'
 
 const AdminProducts = () => {
   const { backendUrl, adminToken } = useContext(AuthContext)
@@ -11,24 +12,31 @@ const AdminProducts = () => {
   const [search, setSearch] = useState('')
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState(null)
   
   const debouncedSearch = useDebounce(search, 300)
 
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const params = debouncedSearch ? `?search=${encodeURIComponent(debouncedSearch)}` : ''
-      // Reuse existing public endpoint
-      const data = await adminGet(backendUrl, '', `/api/product/list${params}`)
+      const params = new URLSearchParams()
+      params.append('page', currentPage)
+      params.append('limit', 10)
+      if (debouncedSearch) {
+        params.append('search', debouncedSearch)
+      }
+      
+      const data = await adminGet(backendUrl, '', `/api/product/list?${params.toString()}`)
       
       if (data.success) {
-        // Normalize: backend id -> _id, image string -> [image] array for local compatibility
         const normalized = data.products.map(p => ({
           ...p,
           _id: p.id,
           image: p.image ? [p.image] : []
         }))
         setProducts(normalized)
+        setPagination(data.pagination)
       } else {
         toast.error(data.message)
       }
@@ -40,9 +48,14 @@ const AdminProducts = () => {
     }
   }
 
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearch])
+
   useEffect(() => {
     fetchProducts()
-  }, [debouncedSearch, backendUrl])
+  }, [debouncedSearch, currentPage, backendUrl])
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) return
@@ -172,6 +185,17 @@ const AdminProducts = () => {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className='border-t border-gray-100 bg-gray-50/30'>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

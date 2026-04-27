@@ -22,6 +22,9 @@ const toArray = (value) => {
 const listProducts = async (req, res) => {
     try {
         const { category, subCategory, minPrice, maxPrice, search, sortBy } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const offset = (page - 1) * limit;
 
         // --- Build the WHERE clause dynamically ---
         let conditions = "WHERE 1=1";
@@ -61,6 +64,13 @@ const listProducts = async (req, res) => {
             params.push(`%${search.trim()}%`);
         }
 
+        // --- Step 1: Count total matching rows (for pagination) ---
+        // We reuse the same conditions but skip ORDER BY and correlated subqueries
+        const countQuery = `SELECT COUNT(*) AS total FROM products p ${conditions}`;
+        const [countRows] = await db.execute(countQuery, [...params]);
+        const totalItems = countRows[0].total;
+        const totalPages = Math.ceil(totalItems / limit);
+
         // --- Build ORDER BY clause ---
         // We pick from a safe whitelist — never inject user input directly.
         let orderBy = "ORDER BY p.id "; // default: newest first
@@ -70,7 +80,6 @@ const listProducts = async (req, res) => {
 
         // --- Assemble the final query ---
         // Correlated subquery grabs exactly ONE image per product.
-        // No JOIN needed, no GROUP BY needed, no Cartesian explosion.
         const query = `
             SELECT
                 p.*,
@@ -78,11 +87,24 @@ const listProducts = async (req, res) => {
             FROM products p
             ${conditions}
             ${orderBy}
+            LIMIT ? OFFSET ?
         `;
+
+        // Add limit and offset to params
+        params.push(limit, offset);
 
         const [rows] = await db.execute(query, params);
 
-        res.json({ success: true, products: rows });
+        res.json({ 
+            success: true, 
+            products: rows,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                limit
+            }
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });

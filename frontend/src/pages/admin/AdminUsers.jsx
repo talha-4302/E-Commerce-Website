@@ -2,19 +2,23 @@ import React, { useState, useEffect, useContext } from 'react'
 import { AuthContext } from '../../context/AuthContext'
 import { adminGet, adminPut } from '../../utils/adminApi'
 import { toast } from 'react-toastify'
+import Pagination from '../../components/Pagination.jsx'
 
 const AdminUsers = () => {
   const { backendUrl, adminToken } = useContext(AuthContext)
   
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState(null)
 
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const data = await adminGet(backendUrl, adminToken, '/api/admin/users')
+      const data = await adminGet(backendUrl, adminToken, `/api/admin/users?page=${currentPage}&limit=10`)
       if (data.success) {
         setUsers(data.users)
+        setPagination(data.pagination)
       } else {
         toast.error(data.message)
       }
@@ -30,7 +34,7 @@ const AdminUsers = () => {
     if (adminToken) {
       fetchUsers()
     }
-  }, [adminToken, backendUrl])
+  }, [adminToken, backendUrl, currentPage])
 
   const toggleUserStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' ? 'banned' : 'active'
@@ -158,6 +162,17 @@ const AdminUsers = () => {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className='border-t border-gray-100 bg-gray-50/30'>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

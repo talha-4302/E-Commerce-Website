@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { AuthContext } from '../../context/AuthContext'
 import { adminGet, adminPut } from '../../utils/adminApi'
 import { toast } from 'react-toastify'
+import Pagination from '../../components/Pagination.jsx'
 
 const statusColors = {
   Pending: 'bg-blue-100 text-blue-700',
@@ -19,17 +20,21 @@ const AdminOrders = () => {
   const [filter, setFilter] = useState('All')
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState(null)
 
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const path = filter === 'All' 
-        ? '/api/admin/orders' 
-        : `/api/admin/orders?status=${filter}`
+      let path = `/api/admin/orders?page=${currentPage}&limit=10`
+      if (filter !== 'All') {
+        path += `&status=${filter}`
+      }
       
       const data = await adminGet(backendUrl, adminToken, path)
       if (data.success) {
         setOrders(data.orders)
+        setPagination(data.pagination)
       } else {
         toast.error(data.message)
       }
@@ -41,11 +46,16 @@ const AdminOrders = () => {
     }
   }
 
+  // Reset page to 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filter])
+
   useEffect(() => {
     if (adminToken) {
       fetchOrders()
     }
-  }, [filter, adminToken, backendUrl])
+  }, [filter, currentPage, adminToken, backendUrl])
 
   const updateStatus = async (id, newStatus) => {
     try {
@@ -172,6 +182,17 @@ const AdminOrders = () => {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className='border-t border-gray-100 bg-gray-50/30'>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

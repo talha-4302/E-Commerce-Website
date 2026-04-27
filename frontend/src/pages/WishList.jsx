@@ -1,10 +1,10 @@
-import React, { useContext, useState, } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Filter from '../components/Filter.jsx'
 import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
-
+import Pagination from '../components/Pagination.jsx'
 
 const WishList = () => {
   const {
@@ -19,12 +19,21 @@ const WishList = () => {
     setWishlistFilters
   } = useContext(ShopContext)
 
+  const ITEMS_PER_PAGE = 10;
   const [selectedSizes, setSelectedSizes] = useState({})
+  const [currentPage, setCurrentPage] = useState(1);
 
+  // Reset page when filters change
+  useEffect(() => {
+      setCurrentPage(1);
+  }, [wishlistFilters]);
 
   const filteredWishlist = filterWishlist()
-
-
+  const totalPages = Math.ceil(filteredWishlist.length / ITEMS_PER_PAGE);
+  const paginatedWishlist = filteredWishlist.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+  );
 
   const handleAddToCart = (product) => {
     const size = selectedSizes[product._id] || product.sizes?.[0] || null;
@@ -78,9 +87,9 @@ const WishList = () => {
           </div>
         ) : (
           <div className='space-y-6'>
-            {filteredWishlist.map(item => (
-              <div >
-                <div key={item._id} className='flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-6 border border-gray-200 rounded-lg bg-white'>
+            {paginatedWishlist.map(item => (
+              <div key={item._id}>
+                <div className='flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-6 border border-gray-200 rounded-lg bg-white'>
                   {/* Product Image */}
                   <img
                     src={item.image?.[0]}
@@ -133,6 +142,15 @@ const WishList = () => {
                 </div>
               </div>
             ))}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            )}
           </div>
         )}
       </div>

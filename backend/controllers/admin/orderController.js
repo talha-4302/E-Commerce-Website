@@ -6,6 +6,22 @@ import db from "../../config/database.js";
 const getAllOrders = async (req, res) => {
     try {
         const { status } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        // --- Step 1: Count total matching orders (for pagination) ---
+        let countQuery = "SELECT COUNT(*) AS total FROM orders";
+        const countParams = [];
+        if (status && status !== 'All') {
+            countQuery += " WHERE status = ?";
+            countParams.push(status);
+        }
+        const [countRows] = await db.execute(countQuery, countParams);
+        const totalItems = countRows[0].total;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        // --- Step 2: Get paginated orders ---
         let query = `
             SELECT o.*, u.name AS customer_name, u.email AS customer_email
             FROM orders o
@@ -18,12 +34,22 @@ const getAllOrders = async (req, res) => {
             params.push(status);
         }
 
-        query += " ORDER BY o.created_at DESC";
+        query += " ORDER BY o.created_at DESC LIMIT ? OFFSET ?";
+        params.push(limit, offset);
 
         const [orders] = await db.execute(query, params);
 
         if (orders.length === 0) {
-            return res.json({ success: true, orders: [] });
+            return res.json({ 
+                success: true, 
+                orders: [],
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    totalItems,
+                    limit
+                }
+            });
         }
 
         // Batch fetch items for all orders to avoid N+1 problem
@@ -46,7 +72,16 @@ const getAllOrders = async (req, res) => {
             items: itemRows.filter(row => row.order_id === order.id)
         }));
 
-        res.json({ success: true, orders: ordersData });
+        res.json({ 
+            success: true, 
+            orders: ordersData,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                limit
+            }
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });

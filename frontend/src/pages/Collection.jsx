@@ -5,9 +5,20 @@ import { ShopContext } from '../context/ShopContext.js'
 import ProductCard from '../components/ProductCard'
 import { assets } from '../assets/assets.js'
 import Filter from '../components/Filter.jsx'
+import Pagination from '../components/Pagination.jsx'
 
 const Collection = () => {
-  const { products, loading, filters, setFilters, sortBy, setSortBy } = useContext(ProductContext)
+  const {
+    products,
+    loading,
+    filters,
+    setFilters,
+    sortBy,
+    setSortBy,
+    currentPage,
+    setCurrentPage,
+    pagination
+  } = useContext(ProductContext)
   const { mobileFilterVisible, setMobileFilterVisible } = useContext(ShopContext)
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') || ''
@@ -80,19 +91,29 @@ const Collection = () => {
             <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black'></div>
           </div>
         ) : (
-          /* Products Grid */
-          <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
-            {products.map(product => (
-              <ProductCard
-                key={product._id}
-                _id={product._id}
-                name={product.name}
-                price={product.price}
-                image={product.image[0]}
-                bestseller={product.bestseller}
+          <>
+            <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+              {products.map(product => (
+                <ProductCard
+                  key={product._id}
+                  _id={product._id}
+                  name={product.name}
+                  price={product.price}
+                  image={product.image[0]}
+                  bestseller={product.bestseller}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {!loading && pagination.totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={setCurrentPage}
               />
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -1,21 +1,25 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext.js'
+import Pagination from '../components/Pagination.jsx'
 
 const Orders = () => {
   const { fetchOrders, currency } = useContext(ShopContext)
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState(null)
 
   const loadOrderData = async () => {
-    setLoading(true) //*t kept for future: if need for re-fetching (e.g. user placed a new order & wants to see it immediately)
-    const data = await fetchOrders()
-    setOrders(data)
+    setLoading(true)
+    const result = await fetchOrders(currentPage, 10)
+    setOrders(result.orders)
+    setPagination(result.pagination)
     setLoading(false)
   }
 
   useEffect(() => {
     loadOrderData()
-  }, [])
+  }, [currentPage])
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -94,6 +98,15 @@ const Orders = () => {
               </div>
             </div>
           ))}
+
+          {/* Pagination */}
+          {pagination && pagination.totalPages > 1 && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </div>
       )}
     </div>

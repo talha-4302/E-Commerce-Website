@@ -74,15 +74,35 @@ const placeOrder = async (req, res) => {
 const getUserOrders = async (req, res) => {
     try {
         const userId = req.userId;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
 
-        // Query 1: Get all orders for the user
-        const [orders] = await db.execute(
-            "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC",
+        // --- Step 1: Count total orders for pagination ---
+        const [countRows] = await db.execute(
+            "SELECT COUNT(*) AS total FROM orders WHERE user_id = ?",
             [userId]
+        );
+        const totalItems = countRows[0].total;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        // --- Step 2: Get paginated orders for the user ---
+        const [orders] = await db.execute(
+            "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            [userId, limit, offset]
         );
 
         if (orders.length === 0) {
-            return res.json({ success: true, orders: [] });
+            return res.json({ 
+                success: true, 
+                orders: [],
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    totalItems,
+                    limit
+                }
+            });
         }
 
         // Query 2: Get all items for these orders with product details
@@ -105,7 +125,16 @@ const getUserOrders = async (req, res) => {
             items: itemRows.filter(row => row.order_id === order.id)
         }));
 
-        res.json({ success: true, orders: ordersData });
+        res.json({ 
+            success: true, 
+            orders: ordersData,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalItems,
+                limit
+            }
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
