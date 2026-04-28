@@ -19,20 +19,20 @@ const WishList = () => {
     setWishlistFilters
   } = useContext(ShopContext)
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 6;
   const [selectedSizes, setSelectedSizes] = useState({})
   const [currentPage, setCurrentPage] = useState(1);
 
   // Reset page when filters change
   useEffect(() => {
-      setCurrentPage(1);
+    setCurrentPage(1);
   }, [wishlistFilters]);
 
   const filteredWishlist = filterWishlist()
   const totalPages = Math.ceil(filteredWishlist.length / ITEMS_PER_PAGE);
   const paginatedWishlist = filteredWishlist.slice(
-      (currentPage - 1) * ITEMS_PER_PAGE,
-      currentPage * ITEMS_PER_PAGE
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   const handleAddToCart = (product) => {
@@ -111,8 +111,8 @@ const WishList = () => {
                               key={size}
                               onClick={() => setSelectedSizes(prev => ({ ...prev, [item._id]: size }))}
                               className={`px-3 py-1 border rounded text-sm transition-all ${selectedSizes[item._id] === size
-                                  ? 'border-black bg-black text-white'
-                                  : 'border-gray-300 hover:border-gray-400 text-gray-600'
+                                ? 'border-black bg-black text-white'
+                                : 'border-gray-300 hover:border-gray-400 text-gray-600'
                                 }`}
                             >
                               {size}
@@ -145,11 +145,11 @@ const WishList = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                />
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             )}
           </div>
         )}

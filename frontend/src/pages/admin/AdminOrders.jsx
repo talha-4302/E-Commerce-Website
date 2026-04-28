@@ -16,7 +16,7 @@ const statuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled']
 
 const AdminOrders = () => {
   const { backendUrl, adminToken } = useContext(AuthContext)
-  
+
   const [filter, setFilter] = useState('All')
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -30,11 +30,12 @@ const AdminOrders = () => {
       if (filter !== 'All') {
         path += `&status=${filter}`
       }
-      
+
       const data = await adminGet(backendUrl, adminToken, path)
       if (data.success) {
         setOrders(data.orders)
         setPagination(data.pagination)
+        console.log(data.pagination)
       } else {
         toast.error(data.message)
       }
@@ -162,11 +163,11 @@ const AdminOrders = () => {
                     <p className='text-xs text-gray-400'>{order.customer_email}</p>
                   </div>
                   <div className='bg-gray-50 p-2 rounded mb-3'>
-                     {order.items.map((item, idx) => (
-                        <p key={idx} className='text-xs text-gray-600 mb-1 last:mb-0'>
-                          {item.product_name} ({item.size}) x {item.quantity}
-                        </p>
-                      ))}
+                    {order.items.map((item, idx) => (
+                      <p key={idx} className='text-xs text-gray-600 mb-1 last:mb-0'>
+                        {item.product_name} ({item.size}) x {item.quantity}
+                      </p>
+                    ))}
                   </div>
                   <div className='flex justify-between items-center mb-3'>
                     <span className='text-xs text-gray-400'>Total Amount:</span>

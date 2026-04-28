@@ -12,7 +12,7 @@ const Orders = () => {
 
   const loadOrderData = async () => {
     setLoading(true)
-    const result = await fetchOrders(currentPage, 10)
+    const result = await fetchOrders(currentPage, 5)
     setOrders(result.orders)
     setPagination(result.pagination)
     setLoading(false)
@@ -146,7 +146,7 @@ const Orders = () => {
 
           {/* Pagination */}
           {pagination && pagination.totalPages > 1 && (
-            <Pagination 
+            <Pagination
               currentPage={currentPage}
               totalPages={pagination.totalPages}
               onPageChange={setCurrentPage}

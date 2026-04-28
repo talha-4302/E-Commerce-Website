@@ -82,7 +82,7 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    const fetchOrders = async (page = 1, limit = 10) => {
+    const fetchOrders = async (page = 1, limit = 5) => {
         if (!token) return { orders: [], pagination: null };
         try {
             const response = await axios.get(
