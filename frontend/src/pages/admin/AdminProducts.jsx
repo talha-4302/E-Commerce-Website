@@ -8,13 +8,13 @@ import Pagination from '../../components/Pagination.jsx'
 
 const AdminProducts = () => {
   const { backendUrl, adminToken } = useContext(AuthContext)
-  
+
   const [search, setSearch] = useState('')
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [pagination, setPagination] = useState(null)
-  
+
   const debouncedSearch = useDebounce(search, 300)
 
   const fetchProducts = async () => {
@@ -23,12 +23,13 @@ const AdminProducts = () => {
       const params = new URLSearchParams()
       params.append('page', currentPage)
       params.append('limit', 10)
+      params.append('status', 'all')
       if (debouncedSearch) {
         params.append('search', debouncedSearch)
       }
-      
+
       const data = await adminGet(backendUrl, '', `/api/product/list?${params.toString()}`)
-      
+
       if (data.success) {
         const normalized = data.products.map(p => ({
           ...p,
@@ -89,7 +90,7 @@ const AdminProducts = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             {search && (
-              <button 
+              <button
                 onClick={() => setSearch('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >

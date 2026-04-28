@@ -12,6 +12,20 @@ const addToCart = async (req, res) => {
             return res.json({ success: false, message: "Missing required fields" });
         }
 
+        // Check if product is active before adding to cart
+        const [productRows] = await db.execute(
+            "SELECT product_status FROM products WHERE id = ?",
+            [productId]
+        );
+
+        if (productRows.length === 0) {
+            return res.json({ success: false, message: "Product not found" });
+        }
+
+        if (productRows[0].product_status !== 'active') {
+            return res.json({ success: false, message: "This product is currently unavailable" });
+        }
+
         const query = `
             INSERT INTO cart_items (user_id, product_id, size, quantity)
             VALUES (?, ?, ?, ?)

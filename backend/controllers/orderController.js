@@ -33,6 +33,13 @@ const placeOrder = async (req, res) => {
         `;
         const [cartItems] = await connection.execute(cartQuery, [userId]);
 
+        const actualTotalAmount = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0) + 10;
+
+        if (actualTotalAmount !== totalAmount) {
+            await connection.rollback();
+            return res.json({ success: false, message: "Maintainance in place, Please Refresh and try again." });
+        }
+
         if (cartItems.length === 0) {
             await connection.rollback();
             return res.json({ success: false, message: "Cart is empty" });
@@ -93,8 +100,8 @@ const getUserOrders = async (req, res) => {
         );
 
         if (orders.length === 0) {
-            return res.json({ 
-                success: true, 
+            return res.json({
+                success: true,
                 orders: [],
                 pagination: {
                     currentPage: page,
@@ -108,7 +115,7 @@ const getUserOrders = async (req, res) => {
         // Query 2: Get all items for these orders with product details
         const orderIds = orders.map(o => o.id);
         const placeholders = orderIds.map(() => "?").join(",");
-        
+
         const itemsQuery = `
             SELECT oi.*, 
                    COALESCE(p.name, 'Product Unavailable') AS name,
@@ -129,8 +136,8 @@ const getUserOrders = async (req, res) => {
             items: itemRows.filter(row => row.order_id === order.id)
         }));
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             orders: ordersData,
             pagination: {
                 currentPage: page,

@@ -25,9 +25,10 @@ const listProducts = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
         const offset = (page - 1) * limit;
+        const status = req.query.status;
 
         // --- Build the WHERE clause dynamically ---
-        let conditions = "WHERE p.product_status = 'active'";
+        let conditions = status === 'all' ? 'WHERE 1=1' : "WHERE p.product_status = 'active'";
         const params = [];
 
         // Filter by category (comma-separated → array)
@@ -95,8 +96,8 @@ const listProducts = async (req, res) => {
 
         const [rows] = await db.execute(query, params);
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             products: rows,
             pagination: {
                 currentPage: page,
