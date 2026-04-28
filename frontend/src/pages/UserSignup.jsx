@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const UserSignup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const navigate = useNavigate();
+    const { backendUrl, setToken, setUserName } = useContext(AuthContext);
+
+
     const onSubmitHandler = async (event) => {
         event.preventDefault();
-        // Handle signup logic
+        try {
+            const response = await axios.post(backendUrl + '/api/user/register', { name, email, password });
+            if (response.data.success) {
+                setToken(response.data.token);
+                localStorage.setItem('token', response.data.token);
+                setUserName(response.data.userName);
+                localStorage.setItem('userName', response.data.userName);
+                toast.success("Account created successfully!");
+                navigate('/');
+            } else {
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(error.message);
+        }
     };
 
     return (

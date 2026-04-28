@@ -1,8 +1,16 @@
-import { React, useContext } from 'react'
-import { ShopContext } from '../context/ShopContext'
+import { React } from 'react'
 
-const Filter = () => {
-  const { filters, setFilters, mobileFilterVisible, setMobileFilterVisible } = useContext(ShopContext);
+// ---------------------------------------------------------------
+// Filter Component — The "Stateless" UI Layer
+//
+// Pattern: Pure Component / Prop Drilling
+// Instead of grabbing global state itself, this component
+// receives its instructions (filters) and its tools (setFilters)
+// as props. This allows us to use the same component for:
+//   1. Main Collection (Marketplace context)
+//   2. Wishlist (Personal session context)
+// ---------------------------------------------------------------
+const Filter = ({ filters, setFilters, mobileFilterVisible, setMobileFilterVisible }) => {
 
   const handleCategoryChange = (cat) => {
     setFilters(prev => ({
@@ -112,3 +120,4 @@ const Filter = () => {
 }
 
 export default Filter
+

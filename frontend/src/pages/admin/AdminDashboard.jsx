@@ -1,37 +1,52 @@
-import React from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { products } from '../../assets/assets'
-
-// Dummy data (replace with backend API later)
-const dummyOrderStatus = [
-  { label: 'Placed', count: 320, width: '80%' },
-  { label: 'Confirmed', count: 280, width: '70%' },
-  { label: 'Shipped', count: 350, width: '88%' },
-  { label: 'Delivered', count: 298, width: '75%' },
-]
-
-const dummyRecentOrders = [
-  { id: '#1041', customer: 'Jane S.', amount: '$340', status: 'Delivered' },
-  { id: '#1040', customer: 'Mike L.', amount: '$120', status: 'Shipped' },
-  { id: '#1039', customer: 'Sara W.', amount: '$560', status: 'Placed' },
-  { id: '#1038', customer: 'Tom B.', amount: '$210', status: 'Confirmed' },
-  { id: '#1037', customer: 'Amy R.', amount: '$290', status: 'Delivered' },
-]
-
-const statusColors = {
-  Placed: 'bg-blue-100 text-blue-700',
-  Confirmed: 'bg-orange-100 text-orange-700',
-  Shipped: 'bg-purple-100 text-purple-700',
-  Delivered: 'bg-green-100 text-green-700',
-}
-
-// Pick 6 bestseller products from existing data
-const bestSellers = products
-  .filter(p => p.bestSeller)
-  .slice(0, 6)
-  .map((p, i) => ({ ...p, sold: [142, 118, 96, 87, 74, 63][i] || 50 }))
+import { AuthContext } from '../../context/AuthContext'
+import { adminGet } from '../../utils/adminApi'
 
 const AdminDashboard = () => {
+  const { backendUrl, adminToken } = useContext(AuthContext)
+  
+  const [stats, setStats] = useState({ totalOrders: 0, totalUsers: 0, totalProducts: 0 })
+  const [orderStatus, setOrderStatus] = useState([])
+  const [recentOrders, setRecentOrders] = useState([])
+  const [bestSellers, setBestSellers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        const data = await adminGet(backendUrl, adminToken, '/api/admin/dashboard')
+        if (data.success) {
+          setStats(data.stats)
+          setOrderStatus(data.orderStatus)
+          setRecentOrders(data.recentOrders)
+          setBestSellers(data.bestSellers)
+        }
+      } catch (error) {
+        console.error("Dashboard fetch error:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (adminToken) {
+      fetchDashboardData()
+    }
+  }, [backendUrl, adminToken])
+
+  const statusColors = {
+    Pending: 'bg-blue-100 text-blue-700',
+    Confirmed: 'bg-orange-100 text-orange-700',
+    Shipped: 'bg-purple-100 text-purple-700',
+    Delivered: 'bg-green-100 text-green-700',
+    Cancelled: 'bg-red-100 text-red-700',
+  }
+
+  if (loading) {
+    return <div className='flex justify-center items-center h-64'><p className='text-gray-500'>Loading dashboard...</p></div>
+  }
+
   return (
     <div>
       {/* Header */}
@@ -39,9 +54,9 @@ const AdminDashboard = () => {
 
       {/* Stat Cards */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8'>
-        <StatCard value='1,248' label='Orders' />
-        <StatCard value='3,420' label='Users' />
-        <StatCard value='52' label='Products' />
+        <StatCard value={stats.totalOrders} label='Orders' />
+        <StatCard value={stats.totalUsers} label='Users' />
+        <StatCard value={stats.totalProducts} label='Products' />
       </div>
 
       {/* Two Column Layout */}
@@ -52,36 +67,48 @@ const AdminDashboard = () => {
           <div className='bg-white border border-gray-200 rounded p-5'>
             <h2 className='text-lg font-medium text-gray-800 mb-4'>Order Status</h2>
             <div className='space-y-3'>
-              {dummyOrderStatus.map(item => (
-                <div key={item.label} className='flex items-center gap-3'>
-                  <span className='text-base text-gray-600 w-24'>{item.label}</span>
-                  <span className='text-base font-medium text-gray-800 w-10'>{item.count}</span>
-                  <div className='flex-1 h-3 bg-gray-100 rounded-full overflow-hidden'>
-                    <div
-                      className='h-full bg-gray-700 rounded-full'
-                      style={{ width: item.width }}
-                    ></div>
+              {orderStatus.map(item => {
+                const percentage = stats.totalOrders > 0 
+                  ? Math.round((item.count / stats.totalOrders) * 100) 
+                  : 0
+                return (
+                  <div key={item.status} className='flex items-center gap-3'>
+                    <span className='text-base text-gray-600 w-24'>{item.status}</span>
+                    <span className='text-base font-medium text-gray-800 w-20'>{item.count} ({percentage}%)</span>
+                    <div className='flex-1 h-3 bg-gray-100 rounded-full overflow-hidden'>
+                      <div
+                        className='h-full bg-gray-700 rounded-full transition-all duration-500'
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
-          {/* Best Sellers */}
+          {/* Best Sellers — Leaderboard layout */}
           <div className='bg-white border border-gray-200 rounded p-5'>
             <h2 className='text-lg font-medium text-gray-800 mb-4'>Best Sellers</h2>
-            <div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
-              {bestSellers.map(product => (
-                <div key={product._id} className='text-center'>
+            <div className='space-y-4'>
+              {bestSellers.map((product, index) => (
+                <div key={product.id} className='flex items-center gap-4 py-2 border-b border-gray-50 last:border-0'>
+                  <span className='text-lg font-medium text-gray-400 w-6'>#{index + 1}</span>
                   <img
-                    src={product.image[0]}
+                    src={product.image}
                     alt={product.name}
-                    className='w-full aspect-square object-cover rounded mb-2 border border-gray-100'
+                    className='w-12 h-12 object-cover rounded border border-gray-100'
                   />
-                  <p className='text-base text-gray-700 truncate'>{product.name}</p>
-                  <p className='text-sm text-gray-400'>{product.sold} sold</p>
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-base text-gray-800 font-medium truncate'>{product.name}</p>
+                    <p className='text-sm text-gray-500'>${product.price}</p>
+                  </div>
+                  <div className='text-right'>
+                     <span className='text-xs px-2 py-1 bg-yellow-50 text-yellow-700 rounded-full font-medium'>Bestseller</span>
+                  </div>
                 </div>
               ))}
+              {bestSellers.length === 0 && <p className='text-gray-400 text-center py-4'>No bestsellers found.</p>}
             </div>
           </div>
         </div>
@@ -96,20 +123,21 @@ const AdminDashboard = () => {
               </Link>
             </div>
             <div className='space-y-4'>
-              {dummyRecentOrders.map(order => (
+              {recentOrders.map(order => (
                 <div key={order.id} className='flex items-center justify-between pb-3 border-b border-gray-50 last:border-0 last:pb-0'>
-                  <div>
-                    <p className='text-base text-gray-800 font-medium'>{order.id}</p>
-                    <p className='text-sm text-gray-400'>{order.customer}</p>
+                  <div className='min-w-0'>
+                    <p className='text-base text-gray-800 font-medium'>#{order.id}</p>
+                    <p className='text-sm text-gray-400 truncate'>{order.customer_name}</p>
                   </div>
-                  <div className='text-right'>
-                    <p className='text-base text-gray-800'>{order.amount}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[order.status]}`}>
+                  <div className='text-right shrink-0 ml-2'>
+                    <p className='text-base text-gray-800 font-medium'>${order.total_amount}</p>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold ${statusColors[order.status] || 'bg-gray-100 text-gray-600'}`}>
                       {order.status}
                     </span>
                   </div>
                 </div>
               ))}
+              {recentOrders.length === 0 && <p className='text-gray-400 text-center py-4'>No recent orders.</p>}
             </div>
           </div>
         </div>
@@ -120,7 +148,7 @@ const AdminDashboard = () => {
 
 const StatCard = ({ value, label }) => (
   <div className='bg-white border border-gray-200 rounded p-5 text-center'>
-    <p className='text-3xl font-medium text-gray-800'>{value}</p>
+    <p className='text-3xl font-medium text-gray-800'>{value.toLocaleString()}</p>
     <p className='text-base text-gray-400 mt-1'>{label}</p>
   </div>
 )

@@ -3,68 +3,107 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext.js'
 import { assets } from '../assets/assets'
 import ProductCard from '../components/ProductCard'
-import { products } from '../assets/assets'
+import axios from 'axios'
 import { toast } from 'react-toastify'
+import { AuthContext } from '../context/AuthContext.jsx'
 
 const Product = () => {
   const { productid } = useParams()
-  const { currency, getProductById, addToCart, addToWishlist, isInWishlist } = useContext(ShopContext)
+  const { isUserVerified } = useContext(AuthContext)
+  const { currency, addToCart, addToWishlist, isInWishlist, backendUrl } = useContext(ShopContext)
 
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
+  const [relatedProducts, setRelatedProducts] = useState([])
+  const [activeTab, setActiveTab] = useState('shipping')
 
-  useEffect(()=>{window.scrollTo(0,0)}, [productid]);
+  // ---------------------------------------------------------------
+  // Data Fetching: Freshness over Speed (Choice 2)
+  //
+  // Pattern: Resource Fetching
+  // We fetch the full product object (images, sizes, etc.) 
+  // directly from the source of truth (/api/product/single/:id).
+  // ---------------------------------------------------------------
+  const fetchProductData = async () => {
+    setLoading(true)
+    try {
+      const response = await axios.get(`${backendUrl}/api/product/single/${productid}`)
+      if (response.data.success) {
+        const p = response.data.product
+        // Normalize: backend uses id, image array is 'images'
+        const normalizedProduct = {
+          ...p,
+          _id: p.id,
+          image: p.images || []
+        }
+        setProduct(normalizedProduct)
 
+        // Fetch related products (using the same category)
+        const relatedResponse = await axios.get(`${backendUrl}/api/product/list?category=${p.category}`)
+        if (relatedResponse.data.success) {
+          const related = relatedResponse.data.products
+            .filter(item => item.id !== p.id)
+            .slice(0, 4)
+            .map(item => ({
+              ...item,
+              _id: item.id,
+              image: item.image ? [item.image] : []
+            }))
+          setRelatedProducts(related)
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error)
+      toast.error("Failed to load product details")
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const product = getProductById(productid)
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    fetchProductData()
+  }, [productid])
+
 
   const handleAddToCart = () => {
-    if (!product) return;
-    const sizeToAdd = selectedSize || product.sizes?.[0] || null;
-    addToCart(product, sizeToAdd, 1);
+    if (isUserVerified) {
+      if (!product) return;
+      const sizeToAdd = selectedSize || product.sizes?.[0] || null;
+      addToCart(product, sizeToAdd, 1);
+    }
+    else {
+      toast.error("Please log in first")
+    }
+
   }
 
   const handleAddToWishlist = () => {
+    if (!isUserVerified) {
+      toast.error("Please log in first")
+      return;
+    }
     if (!product) return;
     if (isInWishlist(product._id)) {
-      toast.info('Already in wishlist',{
-        autoClose:1500,
+      toast.info('Already in wishlist', {
+        autoClose: 1500,
       });
       return;
     }
     addToWishlist(product);
-    toast.success('Added to wishlist',{
-      autoClose:1500
-    });
   }
 
-  // Dummy reviews data
-  const reviews = [
-    {
-      name: "John Doe",
-      rating: 5,
-      text: "Excellent quality and fits perfectly! Highly recommend this product.",
-      date: "2 weeks ago"
-    },
-    {
-      name: "Sarah Smith",
-      rating: 4,
-      text: "Great value for money. Comfortable and stylish. Only wish it came in more colors.",
-      date: "1 month ago"
-    },
-    {
-      name: "Mike Johnson",
-      rating: 5,
-      text: "Perfect fit and amazing quality. Will definitely buy again!",
-      date: "3 weeks ago"
-    },
-    {
-      name: "Emma Wilson",
-      rating: 4,
-      text: "Love the design and comfort. Delivery was fast and packaging was great.",
-      date: "1 week ago"
-    }
-  ]
+
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center py-40'>
+        <div className='animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-black'></div>
+      </div>
+    )
+  }
 
   if (!product) {
     return (
@@ -73,11 +112,6 @@ const Product = () => {
       </div>
     )
   }
-
-  // Get related products (same category, exclude current product)
-  const relatedProducts = products.filter(p =>
-    p.category === product.category && p._id !== product._id
-  ).slice(0, 4)
 
   return (
     <div className='  transition-opacity ease-in duration-500 opacity-100'>
@@ -95,9 +129,8 @@ const Product = () => {
                 key={index}
                 src={img}
                 alt={`Product ${index + 1}`}
-                className={`w-[20%] sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0 object-cover rounded cursor-pointer border-2 ${
-                  selectedImage === index ? 'border-black' : 'border-gray-200'
-                }`}
+                className={`w-[20%] sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0 object-cover rounded cursor-pointer border-2 ${selectedImage === index ? 'border-black' : 'border-gray-200'
+                  }`}
                 onClick={() => setSelectedImage(index)}
               />
             ))}
@@ -105,9 +138,8 @@ const Product = () => {
 
           {/* Main Image */}
           <div className='flex-1'>
-            {product.image[selectedImage]? null : setSelectedImage(0)}
             <img
-              src={  product.image[selectedImage] }
+              src={product.image[selectedImage] || product.image[0]}
               alt={product.name}
               className='w-full h-[80%] object-cover rounded'
             />
@@ -121,17 +153,14 @@ const Product = () => {
             {product.name}
           </h1>
 
-          {/* Stars and Reviews */}
-          <div className='flex items-center gap-1 mb-4'>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <img
-                key={star}
-                src={star <= 4 ? assets.star_icon : assets.star_dull_icon}
-                alt='star'
-                className='w-4 h-4'
-              />
-            ))}
-            <span className='text-sm text-gray-600 ml-2'>(250)</span>
+          {/* Category Badge */}
+          <div className='flex items-center gap-2 mb-4'>
+            <span className='text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full'>
+              {product.category}
+            </span>
+            <span className='text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full'>
+              {product.sub_category}
+            </span>
           </div>
 
           {/* Price */}
@@ -148,15 +177,14 @@ const Product = () => {
           <div className='mb-6'>
             <p className='text-sm font-medium text-gray-700 mb-3'>Select Size</p>
             <div className='flex gap-3'>
-              {product.sizes.map((size) => (
+              {product.sizes && product.sizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 border rounded ${
-                    selectedSize === size
-                      ? 'border-black bg-black text-white'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
+                  className={`px-4 py-2 border rounded ${selectedSize === size
+                    ? 'border-black bg-black text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                    }`}
                 >
                   {size}
                 </button>
@@ -164,14 +192,14 @@ const Product = () => {
             </div>
           </div>
 
-            <button onClick={handleAddToCart} className='w-full md:w-2/5 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors'>
-              ADD TO CART
-            </button>
+          <button onClick={handleAddToCart} className='w-full md:w-2/5 bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors'>
+            ADD TO CART
+          </button>
 
-            {/* Add to Wishlist Button */}
-            <button onClick={handleAddToWishlist} className={`w-full md:w-2/5 md:ml-3 py-3 rounded border transition-colors mt-3 ${isInWishlist(product._id) ? 'border-black bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300 hover:border-gray-400 text-gray-700'}`}>
-              {isInWishlist(product._id) ? 'IN WISHLIST' : 'ADD TO WISHLIST'}
-            </button>
+          {/* Add to Wishlist Button */}
+          <button onClick={handleAddToWishlist} className={`w-full md:w-2/5 md:ml-3 py-3 rounded border transition-colors mt-3 ${isInWishlist(product._id) ? 'border-black bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300 hover:border-gray-400 text-gray-700'}`}>
+            {isInWishlist(product._id) ? 'IN WISHLIST' : 'ADD TO WISHLIST'}
+          </button>
 
           {/* Gray divider line */}
           <div className='mt-3 md:w-4/5 h-[1px] bg-gray-300 mb-4'></div>
@@ -185,50 +213,95 @@ const Product = () => {
         </div>
       </div>
 
-      {/* Reviews Section */}
+      {/* Product Info Tabs */}
       <div className='mb-16'>
-        <h2 className='text-2xl font-bold text-gray-800 mb-6'>Customer Reviews</h2>
-        <div className='flex overflow-x-auto gap-4 pb-4'>
-          {reviews.map((review, index) => (
-            <div key={index} className='flex-shrink-0 w-64 md:w-72 bg-white p-4 rounded border border-gray-200'>
-              <div className='flex items-center gap-2 mb-2'>
-                <span className='font-medium text-gray-800'>{review.name}</span>
-                <div className='flex'>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <img
-                      key={star}
-                      src={star <= review.rating ? assets.star_icon : assets.star_dull_icon}
-                      alt='star'
-                      className='w-3 h-3'
-                    />
-                  ))}
-                </div>
-              </div>
-              <p className='text-sm text-gray-600 mb-2'>{review.text}</p>
-              <p className='text-xs text-gray-400'>{review.date}</p>
-            </div>
+        {/* Tab Headers */}
+        <div className='flex border-b border-gray-200'>
+          {[
+            { key: 'shipping', label: 'Shipping & Returns' },
+            { key: 'care', label: 'Care Instructions' },
+            { key: 'materials', label: 'Materials & Fabric' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`py-3 px-6 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${activeTab === tab.key
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-400 hover:text-gray-600'
+                }`}
+            >
+              {tab.label}
+            </button>
           ))}
+        </div>
+
+        {/* Tab Content */}
+        <div className='py-6 text-sm text-gray-600 leading-relaxed'>
+          {activeTab === 'shipping' && (
+            <div className='space-y-3'>
+              <p>We offer free standard shipping on all orders over $50.</p>
+              <div className='space-y-2'>
+                <p><span className='font-medium text-gray-800'>Standard Delivery:</span> 5–7 business days</p>
+                <p><span className='font-medium text-gray-800'>Express Delivery:</span> 2–3 business days</p>
+              </div>
+              <div className='mt-4 pt-4 border-t border-gray-100'>
+                <p className='font-medium text-gray-800 mb-2'>Return Policy</p>
+                <p>Returns are accepted within 30 days of delivery. Items must be unworn, unwashed, and in their original packaging with all tags attached. Refunds are processed within 5–7 business days of receiving the returned item.</p>
+              </div>
+            </div>
+          )}
+          {activeTab === 'care' && (
+            <div className='space-y-3'>
+              <p className='font-medium text-gray-800'>Washing</p>
+              <ul className='list-disc list-inside space-y-1 text-gray-600'>
+                <li>Machine wash cold with similar colors</li>
+                <li>Use a gentle cycle for delicate fabrics</li>
+                <li>Do not bleach</li>
+              </ul>
+              <p className='font-medium text-gray-800 mt-4'>Drying & Ironing</p>
+              <ul className='list-disc list-inside space-y-1 text-gray-600'>
+                <li>Tumble dry on low heat</li>
+                <li>Iron on low temperature if needed</li>
+                <li>Do not dry clean</li>
+              </ul>
+              <p className='font-medium text-gray-800 mt-4'>Storage</p>
+              <p>Store folded in a cool, dry place. Avoid prolonged exposure to direct sunlight to preserve color integrity.</p>
+            </div>
+          )}
+          {activeTab === 'materials' && (
+            <div className='space-y-3'>
+              <p>All our products are crafted from carefully selected, premium-quality fabrics designed for comfort and durability.</p>
+              <div className='space-y-2 mt-4'>
+                <p><span className='font-medium text-gray-800'>Fabric Quality:</span> Pre-shrunk, color-fast dyes for long-lasting wear</p>
+                <p><span className='font-medium text-gray-800'>Sourcing:</span> Ethically sourced materials from certified suppliers</p>
+                <p><span className='font-medium text-gray-800'>Sustainability:</span> We are committed to reducing our environmental footprint through responsible manufacturing practices</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Related Products Section */}
-      <div>
-        <h2 className='text-2xl font-bold text-gray-800 mb-6'>You May Also Like</h2>
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6'>
-          {relatedProducts.map((relatedProduct) => (
-            <ProductCard
-              key={relatedProduct._id}
-              _id={relatedProduct._id}
-              name={relatedProduct.name}
-              price={relatedProduct.price}
-              image={relatedProduct.image[0]}
-              bestseller={relatedProduct.bestseller}
-            />
-          ))}
+      {relatedProducts.length > 0 && (
+        <div>
+          <h2 className='text-2xl font-bold text-gray-800 mb-6'>You May Also Like</h2>
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6'>
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard
+                key={relatedProduct._id}
+                _id={relatedProduct._id}
+                name={relatedProduct.name}
+                price={relatedProduct.price}
+                image={relatedProduct.image[0]}
+                bestseller={relatedProduct.bestseller}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
 
 export default Product
+

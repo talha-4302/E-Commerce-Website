@@ -4,7 +4,7 @@ import { ShopContext } from '../context/ShopContext.js'
 import { toast } from 'react-toastify'
 
 const PlaceOrder = () => {
-  const { cartItems, currency, delivery_fee, cartSubtotal, clearCart } = useContext(ShopContext)
+  const { cartItems, currency, delivery_fee, cartSubtotal, placeOrder } = useContext(ShopContext)
   const navigate = useNavigate()
 
   const [method, setMethod] = useState('cod')
@@ -28,7 +28,7 @@ const PlaceOrder = () => {
 
   const total = cartSubtotal + delivery_fee
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     // Validate cart is not empty
     if (cartItems.length === 0) {
@@ -48,12 +48,18 @@ const PlaceOrder = () => {
     }
     
 
-    // Simulate order placement (no backend yet)
-    clearCart()
-    toast.success('Order placed successfully!',{
-      autoClose:1500
-    })
-    navigate('/orders')
+    const shippingAddress = `${formData.firstName} ${formData.lastName}, ${formData.street}, ${formData.city}, ${formData.state} ${formData.zipcode}, ${formData.country}. Phone: ${formData.phone}`
+    
+    const result = await placeOrder(shippingAddress, method, total)
+    
+    if (result.success) {
+      toast.success('Order placed successfully!', {
+        autoClose: 1500
+      })
+      navigate('/orders')
+    } else {
+      toast.error(result.message || 'Failed to place order')
+    }
   }
 
   // Redirect to cart if empty

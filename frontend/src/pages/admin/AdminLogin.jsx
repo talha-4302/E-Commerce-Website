@@ -1,21 +1,37 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assets } from '../../assets/assets'
-
+import Logo from '../../components/Logo'
+import axios from 'axios'
+import { useContext } from 'react'
+import { AuthContext } from '../../context/AuthContext'
+import { toast } from 'react-toastify'
 const AdminLogin = () => {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const { backendUrl, setAdminToken } = useContext(AuthContext)
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Hardcoded credentials — replace with backend auth later
-    if (email === 'admin@ezshop.com' && password === 'admin123') {
-      sessionStorage.setItem('adminLoggedIn', 'true')
-      navigate('/admin/dashboard')
-    } else {
-      setError('Invalid credentials')
+    try {
+      const response = await axios.post(backendUrl + '/api/user/admin', { email, password })
+      if (response.data.success) {
+        setAdminToken(response.data.token)
+        localStorage.setItem('adminToken', response.data.token)
+        toast.success("Welcome to Admin Dashboard")
+        navigate('/admin/dashboard')
+      } else {
+        toast.error(response.data.message)
+        setError(response.data.message)
+      }
+    } catch (err) {
+      console.log(err)
+      toast.error(err.message)
+      setError(err.message)
     }
   }
 
@@ -24,7 +40,7 @@ const AdminLogin = () => {
       <div className='w-full max-w-md'>
         {/* Logo */}
         <div className='text-center mb-8'>
-          <img src={assets.logo} className='w-28 mx-auto mb-4' alt='Logo' />
+          <Logo className='h-8 mx-auto mb-4' />
           <h1 className='text-2xl font-medium text-gray-800'>Admin Panel</h1>
           <p className='text-sm text-gray-400 mt-1'>Sign in to your account</p>
         </div>

@@ -18,6 +18,8 @@ const SearchBar = ({ searchOpen, setSearchOpen }) => {
     e.preventDefault()
     if (searchInput.trim()) {
       navigate(`/collection?q=${encodeURIComponent(searchInput.trim())}`)
+      console.log("sss")
+
       setSearchOpen(false)
       setSearchInput('')
     }
