@@ -41,7 +41,7 @@ const Hero = () => {
 
       {/* Accent Element */}
       <div className='absolute bottom-10 right-10 hidden lg:block'>
-        <p className='text-white/30 text-8xl font-serif italic prata-regular select-none'>Forever.</p>
+        <p className='text-white/30 text-8xl font-serif italic prata-regular select-none'>EZSHOP.</p>
       </div>
     </div>
   )

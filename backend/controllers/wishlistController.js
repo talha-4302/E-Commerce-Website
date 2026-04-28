@@ -15,7 +15,7 @@ const getWishlist = async (req, res) => {
                 (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1) AS image
             FROM wishlist_items wi
             JOIN products p ON wi.product_id = p.id
-            WHERE wi.user_id = ?
+            WHERE wi.user_id = ? AND p.product_status = 'active'
         `;
 
         const [wishlistItems] = await db.execute(query, [userId]);

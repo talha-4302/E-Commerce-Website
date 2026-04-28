@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assets } from '../../assets/assets'
+import Logo from '../../components/Logo'
 import axios from 'axios'
 import { useContext } from 'react'
 import { AuthContext } from '../../context/AuthContext'
@@ -39,7 +40,7 @@ const AdminLogin = () => {
       <div className='w-full max-w-md'>
         {/* Logo */}
         <div className='text-center mb-8'>
-          <img src={assets.logo} className='w-28 mx-auto mb-4' alt='Logo' />
+          <Logo className='h-8 mx-auto mb-4' />
           <h1 className='text-2xl font-medium text-gray-800'>Admin Panel</h1>
           <p className='text-sm text-gray-400 mt-1'>Sign in to your account</p>
         </div>

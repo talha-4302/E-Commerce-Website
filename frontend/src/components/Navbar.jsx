@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Link, Navigate, NavLink, replace, useNavigate, useSearchParams } from 'react-router-dom'
 import { assets } from '../assets/assets.js'
+import Logo from './Logo.jsx'
 import { ShopContext } from '../context/ShopContext.js'
 import { AuthContext } from '../context/AuthContext.jsx'
 
@@ -9,7 +10,7 @@ import { AuthContext } from '../context/AuthContext.jsx'
 
 const Navbar = () => {
     const { mobileFilterVisible, mobileMenuVisible, setMobileMenuVisible, setMobileFilterVisible, cartItemCount } = useContext(ShopContext);
-    const { token, setToken } = useContext(AuthContext);
+    const { token, setToken, userName, setUserName, isUserVerified } = useContext(AuthContext);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [searchInput, setSearchInput] = useState(searchParams.get('q') || '');
@@ -31,7 +32,9 @@ const Navbar = () => {
 
     const HandleUserLogout = () => {
         setToken('');
+        setUserName('');
         localStorage.removeItem('token');
+        localStorage.removeItem('userName');
         navigate('/');
     }
 
@@ -40,10 +43,10 @@ const Navbar = () => {
         <div className='flex flex-col border-b border-gray-100'>
             {/* Main Navbar Row */}
             <div className='flex items-center justify-between py-4 sm:py-5 font-medium gap-4 sm:gap-10'>
-                
+
                 {/* Logo */}
                 <Link to='/' className='flex-shrink-0'>
-                    <img src={assets.logo} className='w-24 sm:w-32' alt="Forever Logo" />
+                    <Logo />
                 </Link>
 
                 {/* Desktop Integrated Search Bar */}
@@ -59,18 +62,18 @@ const Navbar = () => {
                         <img src={assets.search_icon} className='w-4' alt="Search" />
                     </button>
                     {searchInput && (
-                        <img 
-                            onClick={() => { setSearchInput(''); navigate('/collection'); }} 
-                            src={assets.cross_icon} 
-                            className='w-3 absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer opacity-40 hover:opacity-100' 
-                            alt="Clear Search" 
+                        <img
+                            onClick={() => { setSearchInput(''); navigate('/collection'); }}
+                            src={assets.cross_icon}
+                            className='w-3 absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer opacity-40 hover:opacity-100'
+                            alt="Clear Search"
                         />
                     )}
                 </form>
 
                 {/* Right Side: Links & Icons */}
                 <div className='flex items-center gap-4 sm:gap-8 flex-shrink-0'>
-                    
+
                     {/* Desktop Nav Links */}
                     <ul className='hidden lg:flex gap-6 text-[11px] font-bold tracking-[0.2em] text-gray-600'>
                         <NavLink to='/' className='hover:text-black transition-colors'>HOME</NavLink>
@@ -85,8 +88,16 @@ const Navbar = () => {
                             <div className={`${mobileFilterVisible ? null : 'group-hover:block'} hidden absolute z-40 dropdown-menu right-0 pt-4`}>
                                 <div className='flex flex-col w-48 bg-white text-gray-700 rounded-sm shadow-lg border border-gray-100'>
                                     <div className='px-5 py-2.5 border-b border-gray-100'>
-                                        <p className='text-[10px] text-gray-400 uppercase tracking-wider mb-0.5'>Account</p>
-                                        <Link to='/userlogin' className='block text-sm font-medium hover:text-black transition-colors'>Login / Sign Up</Link>
+                                        {isUserVerified ? (
+                                            <p className='text-sm font-medium text-gray-800'>
+                                                Hi, {userName?.split(' ')[0] || 'User'}
+                                            </p>
+                                        ) : (
+                                            <>
+                                                <p className='text-[10px] text-gray-400 uppercase tracking-wider mb-0.5'>Account</p>
+                                                <Link to='/userlogin' className='block text-sm font-medium hover:text-black transition-colors'>Login / Sign Up</Link>
+                                            </>
+                                        )}
                                     </div>
                                     <div className='py-1'>
                                         <Link to='/orders' className='flex items-center gap-3 px-5 py-2 text-sm hover:bg-gray-50 transition-colors'>
@@ -104,16 +115,18 @@ const Navbar = () => {
                                             Wishlist
                                         </Link>
                                     </div>
-                                    <div className='border-t border-gray-100'>
-                                        <p onClick={HandleUserLogout} className='flex items-center gap-3 px-5 py-2 text-sm text-red-500 hover:bg-gray-50 transition-colors cursor-pointer'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='w-4 min-w-4'>
-                                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                                <polyline points="16 17 21 12 16 7" />
-                                                <line x1="21" y1="12" x2="9" y2="12" />
-                                            </svg>
-                                            Logout
-                                        </p>
-                                    </div>
+                                    {isUserVerified && (
+                                        <div className='border-t border-gray-100'>
+                                            <p onClick={HandleUserLogout} className='flex items-center gap-3 px-5 py-2 text-sm text-red-500 hover:bg-gray-50 transition-colors cursor-pointer'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='w-4 min-w-4'>
+                                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                                    <polyline points="16 17 21 12 16 7" />
+                                                    <line x1="21" y1="12" x2="9" y2="12" />
+                                                </svg>
+                                                Logout
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

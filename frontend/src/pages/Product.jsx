@@ -17,6 +17,7 @@ const Product = () => {
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
   const [relatedProducts, setRelatedProducts] = useState([])
+  const [activeTab, setActiveTab] = useState('shipping')
 
   // ---------------------------------------------------------------
   // Data Fetching: Freshness over Speed (Choice 2)
@@ -94,33 +95,7 @@ const Product = () => {
     addToWishlist(product);
   }
 
-  // Dummy reviews data
-  const reviews = [
-    {
-      name: "John Doe",
-      rating: 5,
-      text: "Excellent quality and fits perfectly! Highly recommend this product.",
-      date: "2 weeks ago"
-    },
-    {
-      name: "Sarah Smith",
-      rating: 4,
-      text: "Great value for money. Comfortable and stylish. Only wish it came in more colors.",
-      date: "1 month ago"
-    },
-    {
-      name: "Mike Johnson",
-      rating: 5,
-      text: "Perfect fit and amazing quality. Will definitely buy again!",
-      date: "3 weeks ago"
-    },
-    {
-      name: "Emma Wilson",
-      rating: 4,
-      text: "Love the design and comfort. Delivery was fast and packaging was great.",
-      date: "1 week ago"
-    }
-  ]
+
 
   if (loading) {
     return (
@@ -178,17 +153,14 @@ const Product = () => {
             {product.name}
           </h1>
 
-          {/* Stars and Reviews */}
-          <div className='flex items-center gap-1 mb-4'>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <img
-                key={star}
-                src={star <= 4 ? assets.star_icon : assets.star_dull_icon}
-                alt='star'
-                className='w-4 h-4'
-              />
-            ))}
-            <span className='text-sm text-gray-600 ml-2'>(250)</span>
+          {/* Category Badge */}
+          <div className='flex items-center gap-2 mb-4'>
+            <span className='text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full'>
+              {product.category}
+            </span>
+            <span className='text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full'>
+              {product.sub_category}
+            </span>
           </div>
 
           {/* Price */}
@@ -241,29 +213,71 @@ const Product = () => {
         </div>
       </div>
 
-      {/* Reviews Section */}
+      {/* Product Info Tabs */}
       <div className='mb-16'>
-        <h2 className='text-2xl font-bold text-gray-800 mb-6'>Customer Reviews</h2>
-        <div className='flex overflow-x-auto gap-4 pb-4'>
-          {reviews.map((review, index) => (
-            <div key={index} className='flex-shrink-0 w-64 md:w-72 bg-white p-4 rounded border border-gray-200'>
-              <div className='flex items-center gap-2 mb-2'>
-                <span className='font-medium text-gray-800'>{review.name}</span>
-                <div className='flex'>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <img
-                      key={star}
-                      src={star <= review.rating ? assets.star_icon : assets.star_dull_icon}
-                      alt='star'
-                      className='w-3 h-3'
-                    />
-                  ))}
-                </div>
-              </div>
-              <p className='text-sm text-gray-600 mb-2'>{review.text}</p>
-              <p className='text-xs text-gray-400'>{review.date}</p>
-            </div>
+        {/* Tab Headers */}
+        <div className='flex border-b border-gray-200'>
+          {[
+            { key: 'shipping', label: 'Shipping & Returns' },
+            { key: 'care', label: 'Care Instructions' },
+            { key: 'materials', label: 'Materials & Fabric' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`py-3 px-6 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${activeTab === tab.key
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-400 hover:text-gray-600'
+                }`}
+            >
+              {tab.label}
+            </button>
           ))}
+        </div>
+
+        {/* Tab Content */}
+        <div className='py-6 text-sm text-gray-600 leading-relaxed'>
+          {activeTab === 'shipping' && (
+            <div className='space-y-3'>
+              <p>We offer free standard shipping on all orders over $50.</p>
+              <div className='space-y-2'>
+                <p><span className='font-medium text-gray-800'>Standard Delivery:</span> 5–7 business days</p>
+                <p><span className='font-medium text-gray-800'>Express Delivery:</span> 2–3 business days</p>
+              </div>
+              <div className='mt-4 pt-4 border-t border-gray-100'>
+                <p className='font-medium text-gray-800 mb-2'>Return Policy</p>
+                <p>Returns are accepted within 30 days of delivery. Items must be unworn, unwashed, and in their original packaging with all tags attached. Refunds are processed within 5–7 business days of receiving the returned item.</p>
+              </div>
+            </div>
+          )}
+          {activeTab === 'care' && (
+            <div className='space-y-3'>
+              <p className='font-medium text-gray-800'>Washing</p>
+              <ul className='list-disc list-inside space-y-1 text-gray-600'>
+                <li>Machine wash cold with similar colors</li>
+                <li>Use a gentle cycle for delicate fabrics</li>
+                <li>Do not bleach</li>
+              </ul>
+              <p className='font-medium text-gray-800 mt-4'>Drying & Ironing</p>
+              <ul className='list-disc list-inside space-y-1 text-gray-600'>
+                <li>Tumble dry on low heat</li>
+                <li>Iron on low temperature if needed</li>
+                <li>Do not dry clean</li>
+              </ul>
+              <p className='font-medium text-gray-800 mt-4'>Storage</p>
+              <p>Store folded in a cool, dry place. Avoid prolonged exposure to direct sunlight to preserve color integrity.</p>
+            </div>
+          )}
+          {activeTab === 'materials' && (
+            <div className='space-y-3'>
+              <p>All our products are crafted from carefully selected, premium-quality fabrics designed for comfort and durability.</p>
+              <div className='space-y-2 mt-4'>
+                <p><span className='font-medium text-gray-800'>Fabric Quality:</span> Pre-shrunk, color-fast dyes for long-lasting wear</p>
+                <p><span className='font-medium text-gray-800'>Sourcing:</span> Ethically sourced materials from certified suppliers</p>
+                <p><span className='font-medium text-gray-800'>Sustainability:</span> We are committed to reducing our environmental footprint through responsible manufacturing practices</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

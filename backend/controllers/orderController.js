@@ -29,7 +29,7 @@ const placeOrder = async (req, res) => {
             SELECT ci.product_id, ci.size, ci.quantity, p.price
             FROM cart_items ci
             JOIN products p ON ci.product_id = p.id
-            WHERE ci.user_id = ?
+            WHERE ci.user_id = ? AND p.product_status = 'active'
         `;
         const [cartItems] = await connection.execute(cartQuery, [userId]);
 
@@ -110,10 +110,14 @@ const getUserOrders = async (req, res) => {
         const placeholders = orderIds.map(() => "?").join(",");
         
         const itemsQuery = `
-            SELECT oi.*, p.name, 
-                   (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1) as image
+            SELECT oi.*, 
+                   COALESCE(p.name, 'Product Unavailable') AS name,
+                   COALESCE(
+                       (SELECT image_url FROM product_images WHERE product_id = oi.product_id LIMIT 1),
+                       NULL
+                   ) AS image
             FROM order_items oi
-            JOIN products p ON oi.product_id = p.id
+            LEFT JOIN products p ON oi.product_id = p.id
             WHERE oi.order_id IN (${placeholders})
         `;
 

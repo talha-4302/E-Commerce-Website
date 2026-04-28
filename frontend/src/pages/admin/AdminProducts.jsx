@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthContext } from '../../context/AuthContext'
-import { adminGet, adminDelete } from '../../utils/adminApi'
+import { adminGet, adminPut } from '../../utils/adminApi'
 import useDebounce from '../../hooks/useDebounce'
 import { toast } from 'react-toastify'
 import Pagination from '../../components/Pagination.jsx'
@@ -57,20 +57,18 @@ const AdminProducts = () => {
     fetchProducts()
   }, [debouncedSearch, currentPage, backendUrl])
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) return
-    
+  const handleStatusChange = async (id, newStatus) => {
     try {
-      const data = await adminDelete(backendUrl, adminToken, `/api/admin/products/${id}`)
+      const data = await adminPut(backendUrl, adminToken, `/api/admin/products/${id}/status`, { status: newStatus })
       if (data.success) {
-        toast.success("Product deleted successfully")
-        fetchProducts() // Re-fetch list
+        toast.success(`Product status updated to '${newStatus}'`)
+        fetchProducts()
       } else {
         toast.error(data.message)
       }
     } catch (error) {
-      console.error("Delete product error:", error)
-      toast.error("Failed to delete product")
+      console.error("Status update error:", error)
+      toast.error("Failed to update status")
     }
   }
 
@@ -127,6 +125,7 @@ const AdminProducts = () => {
                     <th className='py-3 px-5 font-medium'>Category</th>
                     <th className='py-3 px-5 font-medium'>Price</th>
                     <th className='py-3 px-5 font-medium'>Bestseller</th>
+                    <th className='py-3 px-5 font-medium'>Status</th>
                     <th className='py-3 px-5 font-medium'>Actions</th>
                   </tr>
                 </thead>
@@ -154,9 +153,19 @@ const AdminProducts = () => {
                         )}
                       </td>
                       <td className='py-3 px-5'>
+                        <select
+                          value={product.product_status || 'active'}
+                          onChange={(e) => handleStatusChange(product._id, e.target.value)}
+                          className='border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-gray-500 cursor-pointer bg-white'
+                        >
+                          <option value='active'>Active</option>
+                          <option value='inactive'>Inactive</option>
+                          <option value='out_of_stock'>Out of Stock</option>
+                        </select>
+                      </td>
+                      <td className='py-3 px-5'>
                         <div className='flex gap-4'>
                           <Link to={`/admin/edit-product/${product._id}`} className='text-sm text-blue-600 hover:text-blue-800 font-medium'>Edit</Link>
-                          <button onClick={() => handleDelete(product._id)} className='text-sm text-red-500 hover:text-red-700 font-medium'>Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -178,9 +187,22 @@ const AdminProducts = () => {
                   <p className='text-sm text-gray-800 font-medium truncate'>{product.name}</p>
                   <p className='text-[10px] text-gray-400 mb-1'>{product.category}</p>
                   <p className='text-sm font-bold text-gray-900 mt-auto'>${product.price}</p>
-                  <div className='flex justify-between mt-3 pt-3 border-t border-gray-50'>
-                    <Link to={`/admin/edit-product/${product._id}`} className='text-xs text-blue-600 font-medium uppercase'>Edit</Link>
-                    <button onClick={() => handleDelete(product._id)} className='text-xs text-red-500 font-medium uppercase'>Delete</button>
+                  <div className='mt-3 pt-3 border-t border-gray-50 flex flex-col gap-3'>
+                    <div className='flex justify-between items-center'>
+                      <span className='text-[10px] text-gray-400 uppercase'>Status:</span>
+                      <select
+                        value={product.product_status || 'active'}
+                        onChange={(e) => handleStatusChange(product._id, e.target.value)}
+                        className='border border-gray-300 rounded px-2 py-1 text-[10px] outline-none focus:border-gray-500 cursor-pointer bg-white'
+                      >
+                        <option value='active'>Active</option>
+                        <option value='inactive'>Inactive</option>
+                        <option value='out_of_stock'>Out of Stock</option>
+                      </select>
+                    </div>
+                    <div className='flex justify-center'>
+                      <Link to={`/admin/edit-product/${product._id}`} className='text-xs text-blue-600 font-medium uppercase'>Edit</Link>
+                    </div>
                   </div>
                 </div>
               ))}

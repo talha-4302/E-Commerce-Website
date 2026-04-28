@@ -27,7 +27,7 @@ const listProducts = async (req, res) => {
         const offset = (page - 1) * limit;
 
         // --- Build the WHERE clause dynamically ---
-        let conditions = "WHERE 1=1";
+        let conditions = "WHERE p.product_status = 'active'";
         const params = [];
 
         // Filter by category (comma-separated → array)
@@ -171,6 +171,7 @@ const getLatestProducts = async (req, res) => {
                 p.*,
                 (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1) AS image
             FROM products p
+            WHERE p.product_status = 'active'
             ORDER BY p.created_at DESC
             LIMIT 8
         `;

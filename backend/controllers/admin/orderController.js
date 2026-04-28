@@ -57,10 +57,14 @@ const getAllOrders = async (req, res) => {
         const placeholders = orderIds.map(() => "?").join(",");
         
         const itemsQuery = `
-            SELECT oi.*, p.name AS product_name,
-                   (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1) AS image
+            SELECT oi.*, 
+                   COALESCE(p.name, 'Product Unavailable') AS product_name,
+                   COALESCE(
+                       (SELECT image_url FROM product_images WHERE product_id = oi.product_id LIMIT 1),
+                       NULL
+                   ) AS image
             FROM order_items oi
-            JOIN products p ON oi.product_id = p.id
+            LEFT JOIN products p ON oi.product_id = p.id
             WHERE oi.order_id IN (${placeholders})
         `;
 

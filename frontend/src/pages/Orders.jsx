@@ -8,6 +8,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [pagination, setPagination] = useState(null)
+  const [expandedOrders, setExpandedOrders] = useState(new Set())
 
   const loadOrderData = async () => {
     setLoading(true)
@@ -16,6 +17,18 @@ const Orders = () => {
     setPagination(result.pagination)
     setLoading(false)
   }
+
+  const toggleOrder = (orderId) => {
+    setExpandedOrders(prev => {
+      const next = new Set(prev);
+      if (next.has(orderId)) {
+        next.delete(orderId);
+      } else {
+        next.add(orderId);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     loadOrderData()
@@ -78,19 +91,51 @@ const Orders = () => {
                 </div>
               </div>
 
-              <div className='space-y-4'>
-                <p className='text-sm font-medium text-gray-700'>Items</p>
-                {order.items.map((item, index) => (
-                  <div key={index} className='flex items-center gap-4 py-2'>
-                    <img src={item.image} alt={item.name} className='w-12 h-12 object-cover rounded' />
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-gray-900 truncate'>{item.name}</p>
-                      <p className='text-xs text-gray-500'>Size: {item.size} | Qty: {item.quantity}</p>
-                    </div>
-                    <p className='text-sm font-medium text-gray-900'>{currency}{item.price}</p>
-                  </div>
-                ))}
+              {/* Collapsible Items Toggle */}
+              <div
+                onClick={() => toggleOrder(order.id)}
+                className='flex items-center justify-between cursor-pointer py-2 hover:bg-gray-50 rounded px-2 transition-colors'
+              >
+                <p className='text-sm text-gray-500'>
+                  {expandedOrders.has(order.id) ? 'Hide' : 'View'} {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                  {!expandedOrders.has(order.id) && order.items.length > 0 && (
+                    <span className='text-gray-400'> — {order.items[0].name}{order.items.length > 1 ? ` and ${order.items.length - 1} more` : ''}</span>
+                  )}
+                </p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${expandedOrders.has(order.id) ? 'rotate-180' : ''}`}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
               </div>
+
+              {/* Expandable Items List */}
+              {expandedOrders.has(order.id) && (
+                <div className='space-y-4 mt-2 pt-2 border-t border-gray-50'>
+                  <p className='text-sm font-medium text-gray-700'>Items</p>
+                  {order.items.map((item, index) => (
+                    <div key={index} className='flex items-center gap-4 py-2'>
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className='w-12 h-12 object-cover rounded' />
+                      ) : (
+                        <div className='w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400'>N/A</div>
+                      )}
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-sm font-medium text-gray-900 truncate'>{item.name}</p>
+                        <p className='text-xs text-gray-500'>Size: {item.size} | Qty: {item.quantity}</p>
+                      </div>
+                      <p className='text-sm font-medium text-gray-900'>{currency}{item.price}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className='mt-6 pt-6 border-t border-gray-100'>
                 <p className='text-sm text-gray-500 mb-1'>Shipping Address</p>

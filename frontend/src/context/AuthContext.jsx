@@ -8,6 +8,7 @@ const AuthContextProvider = (props) => {
 
     const [token, setToken] = useState(() => localStorage.getItem('token') || '');
     const [adminToken, setAdminToken] = useState(() => localStorage.getItem('adminToken') || '');
+    const [userName, setUserName] = useState(() => localStorage.getItem('userName') || '');
     
     const [isUserVerified, setIsUserVerified] = useState(false);
     const [isAdminVerified, setIsAdminVerified] = useState(false);
@@ -16,6 +17,8 @@ const AuthContextProvider = (props) => {
     const verifyUserToken = async () => {
         if (!token) {
             setIsUserVerified(false);
+            setUserName('');
+            localStorage.removeItem('userName');
             return;
         }
 
@@ -29,12 +32,16 @@ const AuthContextProvider = (props) => {
                 setIsUserVerified(false);
                 setToken('');
                 localStorage.removeItem('token');
+                setUserName('');
+                localStorage.removeItem('userName');
             }
         } catch (error) {
             console.log("Token Verification Error", error);
             setIsUserVerified(false);
             setToken('');
             localStorage.removeItem('token');
+            setUserName('');
+            localStorage.removeItem('userName');
         }
     };
 
@@ -80,7 +87,10 @@ const AuthContextProvider = (props) => {
         setToken,
         adminToken,
         setAdminToken,
+        userName,
+        setUserName,
         isUserVerified,
+        setIsUserVerified,
         isAdminVerified,
         isLoading,
         backendUrl

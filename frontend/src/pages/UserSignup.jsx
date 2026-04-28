@@ -11,7 +11,7 @@ const UserSignup = () => {
     const [password, setPassword] = useState('');
 
     const navigate = useNavigate();
-    const { backendUrl, setToken } = useContext(AuthContext);
+    const { backendUrl, setToken, setUserName } = useContext(AuthContext);
 
 
     const onSubmitHandler = async (event) => {
@@ -21,6 +21,8 @@ const UserSignup = () => {
             if (response.data.success) {
                 setToken(response.data.token);
                 localStorage.setItem('token', response.data.token);
+                setUserName(response.data.userName);
+                localStorage.setItem('userName', response.data.userName);
                 toast.success("Account created successfully!");
                 navigate('/');
             } else {

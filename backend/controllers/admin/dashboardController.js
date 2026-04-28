@@ -17,7 +17,7 @@ const getDashboardStats = async (req, res) => {
                 SELECT 
                     (SELECT COUNT(*) FROM orders) AS totalOrders,
                     (SELECT COUNT(*) FROM users WHERE role != 'admin') AS totalUsers,
-                    (SELECT COUNT(*) FROM products) AS totalProducts
+                    (SELECT COUNT(*) FROM products WHERE product_status = 'active') AS totalProducts
             `),
             // Q2: Order status breakdown
             db.execute(`
@@ -39,7 +39,7 @@ const getDashboardStats = async (req, res) => {
                 SELECT p.id, p.name, p.price,
                        (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1) AS image
                 FROM products p
-                WHERE p.bestseller = 1
+                WHERE p.bestseller = 1 AND p.product_status = 'active'
                 LIMIT 5
             `)
         ]);

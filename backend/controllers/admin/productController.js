@@ -112,23 +112,33 @@ const updateProduct = async (req, res) => {
     }
 };
 
-// @desc    Delete a product
-// @route   DELETE /api/admin/products/:id
+// @desc    Update product status (soft delete / reactivate)
+// @route   PUT /api/admin/products/:id/status
 // @access  Private (Admin)
-const deleteProduct = async (req, res) => {
+const updateProductStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const [result] = await db.execute("DELETE FROM products WHERE id = ?", [id]);
+        const { status } = req.body;
+
+        const allowedStatuses = ['active', 'inactive', 'out_of_stock'];
+        if (!allowedStatuses.includes(status)) {
+            return res.json({ success: false, message: "Invalid status value" });
+        }
+
+        const [result] = await db.execute(
+            "UPDATE products SET product_status = ? WHERE id = ?",
+            [status, id]
+        );
 
         if (result.affectedRows === 0) {
             return res.json({ success: false, message: "Product not found" });
         }
 
-        res.json({ success: true, message: "Product deleted successfully" });
+        res.json({ success: true, message: `Product status updated to '${status}'` });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
     }
 };
 
-export { addProduct, updateProduct, deleteProduct };
+export { addProduct, updateProduct, updateProductStatus };

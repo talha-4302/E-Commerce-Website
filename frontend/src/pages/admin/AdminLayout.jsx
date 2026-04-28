@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Outlet, useNavigate, NavLink } from 'react-router-dom'
 import { assets } from '../../assets/assets'
+import Logo from '../../components/Logo'
 import { useContext } from 'react'
 import { AuthContext } from '../../context/AuthContext'
 
@@ -59,7 +60,7 @@ const AdminLayout = () => {
         } lg:translate-x-0`}>
         {/* Logo */}
         <div className='p-5 border-b border-gray-100 pt-16 lg:pt-5'>
-          <img src={assets.logo} className='w-24' alt='Logo' />
+          <Logo className='h-6' />
           <p className='text-sm text-gray-400 mt-1 tracking-wider'>ADMIN PANEL</p>
         </div>
 

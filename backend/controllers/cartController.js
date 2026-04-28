@@ -89,7 +89,7 @@ const getCart = async (req, res) => {
                 (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1) AS image
             FROM cart_items ci
             JOIN products p ON ci.product_id = p.id
-            WHERE ci.user_id = ?
+            WHERE ci.user_id = ? AND p.product_status = 'active'
         `;
 
         const [rows] = await db.execute(query, [userId]);
