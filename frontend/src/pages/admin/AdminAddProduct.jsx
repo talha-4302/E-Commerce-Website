@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../../context/AuthContext'
 import { adminGet, adminPost, adminPut } from '../../utils/adminApi'
 import { toast } from 'react-toastify'
+import axios from 'axios'
 
 const AdminAddProduct = () => {
   const navigate = useNavigate()
@@ -21,8 +22,9 @@ const AdminAddProduct = () => {
     bestSeller: false,
     images: [''], // Array of URL strings, start with 1 field
   })
-  
+
   const [loading, setLoading] = useState(false)
+  const [uploadingIndex, setUploadingIndex] = useState(null)
 
   // Fetch product data if in edit mode
   useEffect(() => {
@@ -95,6 +97,53 @@ const AdminAddProduct = () => {
     const updatedImages = formData.images.filter((_, i) => i !== index)
     // Always keep at least one field
     setFormData(prev => ({ ...prev, images: updatedImages.length > 0 ? updatedImages : [''] }))
+  }
+
+  const handleImageUpload = async (e, index) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file')
+      return
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB')
+      return
+    }
+
+    try {
+      setUploadingIndex(index)
+
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await axios.post(
+        `${backendUrl}/api/admin/upload-image`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      )
+
+      if (response.data.success) {
+        handleImageUrlChange(index, response.data.imageUrl)
+        toast.success('Image uploaded successfully')
+      } else {
+        toast.error(response.data.message)
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Failed to upload image')
+    } finally {
+      setUploadingIndex(null)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -301,26 +350,32 @@ const AdminAddProduct = () => {
           {/* Right - Image URL Fields (Max 4) */}
           <div className='w-full lg:w-80'>
              <div className='bg-gray-50 border border-gray-200 rounded-lg p-5'>
-                <h3 className='text-sm font-bold text-gray-800 mb-4'>Product Image URLs</h3>
-                <p className='text-[10px] text-gray-400 mb-4 uppercase tracking-wider italic'>Maximum 4 image paths allowed</p>
-                
+                <h3 className='text-sm font-bold text-gray-800 mb-4'>Product Images</h3>
+                <p className='text-[10px] text-gray-400 mb-4 uppercase tracking-wider italic'>Maximum 4 images allowed</p>
+
                 <div className='space-y-4'>
                    {formData.images.map((url, index) => (
                     <div key={index} className='relative group'>
-                      <label className='text-[10px] text-gray-500 mb-1 block uppercase'>Image Path #{index + 1}</label>
+                      <label className='text-[10px] text-gray-500 mb-1 block uppercase'>Image #{index + 1}</label>
                       <div className='flex gap-2'>
-                        <input
-                          type='text'
-                          value={url}
-                          onChange={(e) => handleImageUrlChange(index, e.target.value)}
-                          placeholder='/assets/men_shirt_1.jpg'
-                          className='flex-1 p-2 border border-gray-300 rounded text-sm focus:border-black outline-none bg-white'
-                        />
+                        <div className='flex-1'>
+                          <input
+                            type='file'
+                            accept='image/*'
+                            onChange={(e) => handleImageUpload(e, index)}
+                            disabled={uploadingIndex === index}
+                            className='w-full p-2 border border-gray-300 rounded text-sm focus:border-black outline-none bg-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-black file:text-white hover:file:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed'
+                          />
+                          {uploadingIndex === index && (
+                            <p className='text-xs text-blue-600 mt-1'>Uploading...</p>
+                          )}
+                        </div>
                         {formData.images.length > 1 && (
                           <button
                             type='button'
                             onClick={() => removeImageUrlField(index)}
-                            className='w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded transition-colors border border-transparent hover:border-red-100'
+                            disabled={uploadingIndex === index}
+                            className='w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded transition-colors border border-transparent hover:border-red-100 disabled:opacity-50 disabled:cursor-not-allowed'
                           >
                             ×
                           </button>
@@ -328,15 +383,16 @@ const AdminAddProduct = () => {
                       </div>
                       {url.trim() && (
                         <div className='mt-2 border border-gray-200 rounded bg-white overflow-hidden p-1'>
-                           <img 
-                              src={url} 
-                              alt={`Preview ${index + 1}`} 
-                              className='w-full aspect-square object-contain bg-gray-50' 
+                           <img
+                              src={url}
+                              alt={`Preview ${index + 1}`}
+                              className='w-full aspect-square object-contain bg-gray-50'
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://placehold.co/200x200?text=Invalid+Path'
+                                e.target.src = 'https://placehold.co/200x200?text=Invalid+Image'
                               }}
                            />
+                           <p className='text-[9px] text-gray-400 mt-1 truncate' title={url}>{url}</p>
                         </div>
                       )}
                     </div>
