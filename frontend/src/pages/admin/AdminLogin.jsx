@@ -70,7 +70,7 @@ const AdminLogin = () => {
                 type='password'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder='Enter password'
+                placeholder='admin123'
                 className='w-full p-3 border border-gray-300 rounded outline-none focus:border-gray-500 text-sm'
                 required
               />
@@ -85,8 +85,8 @@ const AdminLogin = () => {
           </form>
         </div>
 
-        <p className='text-center text-xs text-gray-400 mt-6'>
-          Demo: admin@ezshop.com / admin123
+        <p className='text-center text-red-500 text-xs mt-6'>
+          Credentials: admin@ezshop.com / admin123
         </p>
       </div>
     </div>
