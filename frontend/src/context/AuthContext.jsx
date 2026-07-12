@@ -4,7 +4,7 @@ import axios from "axios";
 export const AuthContext = createContext();
 
 const AuthContextProvider = (props) => {
-    const backendUrl = "http://localhost:5000";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
     const [token, setToken] = useState(() => localStorage.getItem('token') || '');
     const [adminToken, setAdminToken] = useState(() => localStorage.getItem('adminToken') || '');
