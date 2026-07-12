@@ -26,10 +26,10 @@ const getAllUsers = async (req, res) => {
             WHERE u.role != 'admin'
             GROUP BY u.id
             ORDER BY u.created_at DESC
-            LIMIT ? OFFSET ?
+            LIMIT ${limit} OFFSET ${offset}
         `;
 
-        const [users] = await db.execute(query, [limit, offset]);
+        const [users] = await db.execute(query);
 
         res.json({ 
             success: true, 

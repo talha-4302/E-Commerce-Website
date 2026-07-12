@@ -24,6 +24,7 @@ CREATE TABLE products (
     category VARCHAR(100),
     sub_category VARCHAR(100),
     bestseller TINYINT(1) DEFAULT 0,
+    product_status ENUM('active', 'inactive', 'out_of_stock') DEFAULT 'active',
     created_at DATETIME NOT NULL
 );
 

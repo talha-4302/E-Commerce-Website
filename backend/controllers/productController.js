@@ -88,11 +88,8 @@ const listProducts = async (req, res) => {
             FROM products p
             ${conditions}
             ${orderBy}
-            LIMIT ? OFFSET ?
+            LIMIT ${limit} OFFSET ${offset}
         `;
-
-        // Add limit and offset to params
-        params.push(limit, offset);
 
         const [rows] = await db.execute(query, params);
 

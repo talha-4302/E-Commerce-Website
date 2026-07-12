@@ -34,8 +34,7 @@ const getAllOrders = async (req, res) => {
             params.push(status);
         }
 
-        query += " ORDER BY o.created_at DESC LIMIT ? OFFSET ?";
-        params.push(limit, offset);
+        query += ` ORDER BY o.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
 
         const [orders] = await db.execute(query, params);
 

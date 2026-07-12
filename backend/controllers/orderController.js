@@ -95,8 +95,8 @@ const getUserOrders = async (req, res) => {
 
         // --- Step 2: Get paginated orders for the user ---
         const [orders] = await db.execute(
-            "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
-            [userId, limit, offset]
+            `SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
+            [userId]
         );
 
         if (orders.length === 0) {
