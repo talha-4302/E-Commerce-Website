@@ -2,13 +2,36 @@
 
 A full-stack e-commerce app: React (Vite) frontend, Express/Node backend, MySQL database. Includes a storefront (browse, cart, wishlist, checkout, order history) and an admin panel (products, orders, users, dashboard).
 
+## Live Demo
+
+| | |
+|---|---|
+| Frontend | https://ecommerce-frontend-talha.vercel.app |
+| Backend API | https://backend-production-460a.up.railway.app |
+
 ## Tech Stack
 
 | Layer | Tech |
 |---|---|
 | Frontend | React 19, Vite, React Router, Tailwind CSS, Axios |
-| Backend | Node.js, Express 5, JWT auth, bcrypt |
+| Backend | Node.js, Express 5, JWT auth, bcryptjs |
 | Database | MySQL (via `mysql2`) |
+
+## Backend Architecture
+
+The backend follows a layered architecture with centralized error handling:
+
+```
+routes  ->  controllers  ->  services  ->  repositories  ->  MySQL
+```
+
+- **routes** map URLs to controllers, nothing else.
+- **controllers** parse the request and call a service, wrapped in `catchAsync` so no controller needs its own try/catch.
+- **services** hold business rules and transaction orchestration. They throw `AppError` for expected failures (not found, invalid credentials, bad input).
+- **repositories** are the only place SQL lives.
+- **`middleware/errorHandler.js`** is the single place, mounted last in `app.js`, that catches every error and formats the response.
+
+See [Project Structure](#project-structure) below for the full file layout.
 
 ## Prerequisites
 
@@ -34,9 +57,9 @@ cd E-Commerce-Website
    ```
 3. Import the schema. Using the MySQL CLI:
    ```bash
-   mysql -u root -p ezshop_db < backend/config/schema.sql
+   mysql -u root -p ezshop_db < backend/database/schema.sql
    ```
-   Or open `backend/config/schema.sql` in a GUI tool (MySQL Workbench, TablePlus, HeidiSQL, phpMyAdmin) and run it against your new database.
+   Or open `backend/database/schema.sql` in a GUI tool (MySQL Workbench, TablePlus, HeidiSQL, phpMyAdmin) and run it against your new database.
 
    This creates empty tables only (no sample data). If you have a `.sql` dump with sample products/users, import that instead.
 
@@ -47,7 +70,7 @@ cd backend
 npm install
 ```
 
-Create a `.env` file in `backend/` (or edit the existing one):
+Create a `.env` file in `backend/` (or copy `.env.example`):
 
 ```env
 PORT=5000
@@ -87,7 +110,11 @@ npm run dev
 
 The site will be live at `http://localhost:5173`.
 
-> The frontend currently talks to the backend at a fixed `http://localhost:5000` (set in `frontend/src/context/AuthContext.jsx`). If you run the backend on a different port, update that value to match.
+By default the frontend talks to `http://localhost:5000`. To point it at a different backend (e.g. the deployed Railway API), create `frontend/.env` (see `frontend/.env.example`):
+
+```env
+VITE_BACKEND_URL=http://localhost:5000
+```
 
 ## 5. Using the App
 
@@ -113,25 +140,40 @@ There's no signup form for admins. To make a user an admin:
 
 ```
 .
-├── backend/            Express API
-│   ├── config/          database.js (MySQL pool), schema.sql
-│   ├── controllers/     route logic (products, cart, orders, users, admin/*)
-│   ├── middleware/      JWT auth middleware
-│   ├── routes/           Express routers
-│   └── server.js         app entry point
-└── frontend/            React app (Vite)
+├── backend/
+│   ├── database/
+│   │   └── schema.sql       table definitions (no data)
+│   └── src/
+│       ├── app.js            express app: middleware + routes (no listen)
+│       ├── server.js         entry point, calls app.listen()
+│       ├── config/           database.js (MySQL pool)
+│       ├── constants/        PRODUCT_STATUS, ORDER_STATUS, ACCOUNT_STATUS, USER_ROLE
+│       ├── routes/           URL -> controller mapping, incl. routes/admin/*
+│       ├── controllers/      parses request, calls service, shapes response
+│       ├── services/         business rules, throws AppError on failure
+│       ├── repositories/     the only place SQL lives
+│       ├── middleware/       auth.js (JWT), errorHandler.js (centralized)
+│       └── utils/            AppError, catchAsync
+└── frontend/
     └── src/
-        ├── context/       AuthContext, ShopContext, ProductContext
-        ├── pages/         storefront + admin pages
-        ├── components/    shared UI components
-        └── routes/        storeRoutes.jsx, adminRoutes.jsx
+        ├── context/           AuthContext, ShopContext, ProductContext
+        ├── pages/              storefront + admin pages
+        ├── components/         shared UI components
+        └── routes/             storeRoutes.jsx, adminRoutes.jsx
 ```
+
+## Deployment
+
+The live demo runs on:
+
+- **Frontend**: Vercel, deployed from `frontend/` with `VITE_BACKEND_URL` set to the Railway API URL.
+- **Backend + MySQL**: Railway, deployed from `backend/` with `DB_HOST` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` referencing the MySQL plugin's variables and a real `JWT_SECRET` set.
 
 ## Troubleshooting
 
 | Problem | Likely Fix |
 |---|---|
 | `Unable to connect to the MySQL database` | MySQL isn't running, or `DB_*` values in `backend/.env` are wrong |
-| Frontend shows no products / network errors | Backend isn't running, or isn't on port 5000 (see step 4 note above) |
+| Frontend shows no products / network errors | Backend isn't running, or `VITE_BACKEND_URL` doesn't match where it's running |
 | Admin login says "Not Authorized" | The user's `role` column isn't set to `admin` in the database |
-| `Incorrect arguments to mysqld_stmt_execute` on product/order/user lists | You're running MySQL 8+/9 with an older code checkout that used `LIMIT ? OFFSET ?` placeholders; pull the latest `main`/`master` |
+| `npm install` fails with `spawn powershell.exe ENOENT` or similar cmd.exe errors on Windows | Your project path likely contains a character cmd.exe treats specially (e.g. `&`). Create a local (gitignored) `.npmrc` in `backend/` and/or `frontend/` with `script-shell=powershell.exe`. Do **not** commit it, it breaks Linux-based builds (Vercel/Railway) since `powershell.exe` doesn't exist there |
