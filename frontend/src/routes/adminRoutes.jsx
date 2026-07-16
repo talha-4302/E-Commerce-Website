@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import AdminLogin from '../pages/admin/AdminLogin'
 import AdminLayout from '../pages/admin/AdminLayout'
 import AdminDashboard from '../pages/admin/AdminDashboard'
@@ -16,6 +16,7 @@ const AdminRoutes = () => {
       <Route path='/admin/login' element={<AdminLogin />} />
       <Route element={<AdminProtectedRoute />}>
         <Route path='/admin' element={<AdminLayout />}>
+          <Route index element={<Navigate to='/admin/dashboard' replace />} />
           <Route path='dashboard' element={<AdminDashboard />} />
           <Route path='orders' element={<AdminOrders />} />
           <Route path='products' element={<AdminProducts />} />
