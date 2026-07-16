@@ -80,6 +80,7 @@ const Navbar = () => {
                         <NavLink to='/collection' className='hover:text-black transition-colors'>COLLECTION</NavLink>
                         <NavLink to='/about' className='hover:text-black transition-colors'>ABOUT</NavLink>
                         <NavLink to='/contact' className='hover:text-black transition-colors'>CONTACT</NavLink>
+                        <NavLink to='/admin' className=' text-red-500 hover:text-red-400 transition-colors'>ADMIN PANEL</NavLink>
                     </ul>
 
                     <div className='flex items-center gap-5 sm:gap-6'>
@@ -172,6 +173,7 @@ const Navbar = () => {
                     <NavLink onClick={() => setMobileMenuVisible(false)} className='py-2 pl-6 border' to='/collection' >COLLECTION</NavLink>
                     <NavLink onClick={() => setMobileMenuVisible(false)} className='py-2 pl-6 border' to='/about' >ABOUT</NavLink>
                     <NavLink onClick={() => setMobileMenuVisible(false)} className='py-2 pl-6 border' to='/contact' >CONTACT</NavLink>
+                    <NavLink onClick={() => setMobileMenuVisible(false)} className='py-2 pl-6 border' to='/admin' >ADMIN PANEL</NavLink>
 
                 </div>
             </div>
