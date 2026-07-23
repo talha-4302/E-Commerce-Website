@@ -6,7 +6,7 @@ A full-stack e-commerce app: React (Vite) frontend, Express/Node backend, MySQL 
 
 | | |
 |---|---|
-| Frontend | https://ecommerce-frontend-talha.vercel.app |
+| Frontend | https://ezshop-bs23.vercel.app |
 | Backend API | https://backend-production-460a.up.railway.app |
 
 ## Tech Stack
